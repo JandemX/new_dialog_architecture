@@ -8,6 +8,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KFunction2
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
@@ -63,6 +64,28 @@ data class DialogBuilder<Event, State>(
             singleChoice
     )
 
+    class Builder<Event, State>(context: Context, view: DialogView<Event, State>) {
+        val alertContext: Context = context
+        val layoutId: Int = view.layoutId
+
+        var contentView: KFunction2<View, StateDialog<Event, State>, Unit> = view::setView
+
+        var initialState: State? = null
+
+        var dialogTitle: String = ""
+        var positiveButtonText: String = ""
+        var negativeButtonText: String = ""
+
+        var onPositiveAction: (State?) -> Event? = { null }
+        var onNegativeAction: () -> Unit = {}
+
+        var cancellable: Boolean = true
+        var singleChoice: Boolean = false
+
+        fun build() = DialogBuilder(this).build()
+        fun buildBottomSheet() = DialogBuilder(this).buildBottomSheet()
+    }
+
     companion object {
         fun <Event, State> Fragment.dialog(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): DialogFragment {
             return Builder(this.requireContext(), view).apply { block() }.build()
@@ -74,26 +97,6 @@ data class DialogBuilder<Event, State>(
     }
 }
 
-class Builder<Event, State>(context: Context, private val view: DialogView<Event, State>) {
-    val alertContext: Context = context
-    val layoutId: Int = view.layoutId
-    val contentView: (View, StateDialog<Event, State>) -> Unit = view::setView
-
-    var initialState: State? = null
-
-    var dialogTitle: String = ""
-    var positiveButtonText: String = ""
-    var negativeButtonText: String = ""
-
-    var onPositiveAction: (State?) -> Event? = { null }
-    var onNegativeAction: () -> Unit = {}
-
-    var cancellable: Boolean = true
-    var singleChoice: Boolean = false
-
-    fun build() = DialogBuilder(this).build()
-    fun buildBottomSheet() = DialogBuilder(this).buildBottomSheet()
-}
 
 @Suppress("unused")
 fun <T> Fragment.argument() = object : ReadWriteProperty<Fragment, T> {

@@ -1,6 +1,8 @@
 package com.example.new_dialog_architecture.arch
 
 import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +12,14 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogInteraction.Positive
+import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onEach
@@ -51,17 +55,15 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
     private lateinit var negativeButton: Button
 
     private var layout: Int by argument()
+
     private var customView: (View, StateDialog<Event, State>) -> Unit by argument()
     private var onPositiveAction: (State?) -> Event? by argument()
     private var onNegativeAction: () -> Unit by argument()
     private var dialogTitle: String by argument()
     private var positiveButtonText: String by argument()
     private var negativeButtonText: String by argument()
-
     private var cancellable: Boolean by argument()
-
     private var immediateUpdate: Boolean by argument()
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val mainView = inflater.inflate(R.layout.dialog_scaffold, container, false)
@@ -102,6 +104,14 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
             }
         }
         title.text = dialogTitle
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val window = dialog?.window
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        val width = window?.windowManager?.defaultDisplay?.width
+        width?.run { dialog?.window?.setLayout((width * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT) }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

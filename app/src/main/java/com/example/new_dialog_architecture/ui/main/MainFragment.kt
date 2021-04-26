@@ -52,7 +52,6 @@ class MainFragment : DaggerFragment() {
                     singleChoice = true
                 }.show(this, "test")
             }
-            childFragmentManager.executePendingTransactions()
         }
 
         buttonBottomSheetCheckbox.setOnClickListener {
@@ -67,9 +66,7 @@ class MainFragment : DaggerFragment() {
             childFragmentManager.beginTransaction().apply {
                 bottomSheet(ItemListDialogView()) {
                     initialState = ListDialogState(List(5) { "listitem$it" })
-                    onPositiveAction = {
-                        it
-                    }
+                    onPositiveAction = { it }
                     singleChoice = true
                 }.show(this, "test")
             }

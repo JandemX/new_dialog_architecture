@@ -19,7 +19,6 @@ class SomeAdapter(private val state: List<String>, private val click: (String) -
 
 }
 
-
 class SomeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val text: TextView = view.findViewById(android.R.id.text1)
 
