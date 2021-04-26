@@ -42,6 +42,8 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
         dismissAllowingStateLoss()
     }
 
+    private lateinit var customView: (View, StateDialog<Event, State>) -> Unit
+
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
     private val interactor: Interactor<Event> by dialogInteractor()
     private var initialState: State? = null
@@ -51,7 +53,6 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
     private lateinit var negativeButton: Button
 
     private var layout: Int by argument()
-    private var customView: (View, StateDialog<Event, State>) -> Unit by argument()
     private var onPositiveAction: (State?) -> Event? by argument()
     private var onNegativeAction: () -> Unit by argument()
     private var dialogTitle: String by argument()

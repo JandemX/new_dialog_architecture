@@ -56,7 +56,7 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
 
     private var layout: Int by argument()
 
-    private var customView: (View, StateDialog<Event, State>) -> Unit by argument()
+    private lateinit var customView: (View, StateDialog<Event, State>) -> Unit
     private var onPositiveAction: (State?) -> Event? by argument()
     private var onNegativeAction: () -> Unit by argument()
     private var dialogTitle: String by argument()
