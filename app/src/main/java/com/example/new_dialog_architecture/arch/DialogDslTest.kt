@@ -6,9 +6,6 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import com.example.new_dialog_architecture.ui.main.DialogView
-import com.example.new_dialog_architecture.ui.main.StateDialog
-import com.example.new_dialog_architecture.arch.StateFullInteractionDialog
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty

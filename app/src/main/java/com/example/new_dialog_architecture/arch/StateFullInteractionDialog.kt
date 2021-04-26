@@ -8,8 +8,6 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import com.example.new_dialog_architecture.R
-import com.example.new_dialog_architecture.ui.main.DialogInteractorEvent
-import com.example.new_dialog_architecture.ui.main.StateDialog
 
 class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>() {
 

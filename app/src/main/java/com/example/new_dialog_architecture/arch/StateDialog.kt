@@ -1,12 +1,9 @@
-package com.example.new_dialog_architecture.ui.main
+package com.example.new_dialog_architecture.arch
 
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.new_dialog_architecture.arch.Interactor
-import com.example.new_dialog_architecture.arch.SimpleInteractionDialogVM
-import com.example.new_dialog_architecture.arch.dialogInteractor
 
 abstract class StateDialog<Event, State> : DialogFragment() {
 
