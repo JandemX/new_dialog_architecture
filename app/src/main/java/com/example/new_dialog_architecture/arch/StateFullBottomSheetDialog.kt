@@ -7,13 +7,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.new_dialog_architecture.R
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppCompatDialogFragment() {
+class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, BottomSheetDialogFragment() {
 
     private val producer = object : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -31,7 +31,6 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
     private val interactor: Interactor<DialogInteractorEvent<Event>> by dialogInteractor()
     private var initialState: State? = null
-
 
     private lateinit var title: TextView
     private lateinit var positiveButton: Button
@@ -73,13 +72,6 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
         title.text = dialogTitle
     }
 
-    private fun ViewGroup.replaceView(now: View, toBe: View) {
-        val index = indexOfChild(now)
-        removeView(now)
-        removeView(toBe)
-        addView(toBe, index)
-    }
-
     companion object {
         fun <Event, State> newInstance(
                 layoutid: Int,
@@ -90,7 +82,7 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
                 title: String,
                 positiveText: String,
                 negativeText: String
-        ): StateFullInteractionDialog<Event, State> = StateFullInteractionDialog<Event, State>().apply {
+        ): StateFullBottomSheetDialog<Event, State> = StateFullBottomSheetDialog<Event, State>().apply {
             layout = layoutid
             this.initialState = initialState
             this.customView = customView
@@ -101,8 +93,4 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
             this.negativeButtonText = negativeText
         }
     }
-
 }
-
-
-

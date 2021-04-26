@@ -7,7 +7,6 @@ import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogView
 import com.example.new_dialog_architecture.arch.StateDialog
 
-
 class CheckBoxDialogView : DialogView<MainDialogEvents, CheckboxState> {
     override val layoutId: Int = R.layout.some_dialog_content
 

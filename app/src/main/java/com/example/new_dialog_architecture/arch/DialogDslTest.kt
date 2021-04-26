@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
@@ -34,29 +35,35 @@ data class DialogBuilder<Event, State>(
     )
 
     fun build() = StateFullInteractionDialog.newInstance(layoutId, initialState, setCustomView, onPositiveAction, onNegativeAction, dialogTitle, positiveButtonText, negativeButtonText)
+    fun buildBottomSheet() = StateFullBottomSheetDialog.newInstance(layoutId, initialState, setCustomView, onPositiveAction, onNegativeAction, dialogTitle, positiveButtonText, negativeButtonText)
 
     companion object {
         fun <Event, State> Fragment.dialog(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): DialogFragment {
             return Builder(this.requireContext(), view).apply { block() }.build()
         }
+
+        fun <Event, State> Fragment.bottomSheet(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): BottomSheetDialogFragment {
+            return Builder(this.requireContext(), view).apply { block() }.buildBottomSheet()
+        }
     }
+}
 
-    class Builder<Event, State>(context: Context, private val view: DialogView<Event, State>) {
-        val alertContext: Context = context
-        val layoutId: Int = view.layoutId
-        val contentView: (View, StateDialog<Event, State>) -> Unit = view::setView
+class Builder<Event, State>(context: Context, private val view: DialogView<Event, State>) {
+    val alertContext: Context = context
+    val layoutId: Int = view.layoutId
+    val contentView: (View, StateDialog<Event, State>) -> Unit = view::setView
 
-        var initialState: State? = null
+    var initialState: State? = null
 
-        var dialogTitle: String = ""
-        var positiveButtonText: String = ""
-        var negativeButtonText: String = ""
+    var dialogTitle: String = ""
+    var positiveButtonText: String = ""
+    var negativeButtonText: String = ""
 
-        var onPositiveAction: (State?) -> Event? = { null }
-        var onNegativeAction: () -> Unit = {}
+    var onPositiveAction: (State?) -> Event? = { null }
+    var onNegativeAction: () -> Unit = {}
 
-        fun build() = DialogBuilder(this).build()
-    }
+    fun build() = DialogBuilder(this).build()
+    fun buildBottomSheet() = DialogBuilder(this).buildBottomSheet()
 }
 
 @Suppress("unused")

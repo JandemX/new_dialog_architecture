@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
+import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.bottomSheet
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.dialog
 import com.example.new_dialog_architecture.arch.DialogInteractorEvent
 import com.example.new_dialog_architecture.arch.dialogInteractor
@@ -47,16 +48,23 @@ class MainFragment : DaggerFragment() {
                     onPositiveAction = {
                         it?.let { Data("its a me ") }
                     }
-                }.show(this, "testr")
+                }
 
-                dialog(CheckBoxDialogView()) {
+                bottomSheet(SimpleAlertDialogView()) {
+                    dialogTitle = "Alert dialog"
+                    initialState = ""
+                    positiveButtonText = "Positive"
+                    onPositiveAction = {
+                        it?.let { Data("its a me ") }
+                    }
+                }
+
+                bottomSheet(CheckBoxDialogView()) {
                     dialogTitle = "Simple Checkbox Dialog"
                     initialState = CheckboxState(List(5) { "checkbox$it" })
                     positiveButtonText = "positive"
-                    onPositiveAction = {
-                        it
-                    }
-                }
+                    onPositiveAction = { it }
+                }.show(this, "test")
             }
             childFragmentManager.executePendingTransactions()
         }

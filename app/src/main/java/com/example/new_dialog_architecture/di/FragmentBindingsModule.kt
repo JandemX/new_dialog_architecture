@@ -5,7 +5,7 @@ import com.example.new_dialog_architecture.di.scopes.FragmentScope
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
-@Module(includes = [DialogInteractorModule::class])
+@Module()
 abstract class FragmentBindingsModule() {
 
     @ContributesAndroidInjector()

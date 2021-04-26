@@ -1,27 +1,10 @@
 package com.example.new_dialog_architecture.arch
 
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 
-abstract class StateDialog<Event, State> : DialogFragment() {
-
-    private val producer = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return SimpleInteractionDialogVM(initialState) as T
-        }
-    }
-
-    protected val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
-    protected val interactor: Interactor<DialogInteractorEvent<Event>> by dialogInteractor()
-    protected var initialState: State? = null
-
+// abstract makes no sense. convert to interface and move all the protected stuff into the interactionDialog.
+interface StateDialog<Event, State> {
     val state: State?
-        get() = viewModel.stateSubject.value
-
-    fun updateState(newState: State) = viewModel.stateSubject.compareAndSet(state, newState)
-
+    fun updateState(newState: State)
 }
 
 sealed class DialogInteractorEvent<Event> {
