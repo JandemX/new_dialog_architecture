@@ -6,22 +6,27 @@ import androidx.fragment.app.createViewModelLazy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class Interactor<T> : ViewModel() {
-    private val _eventStream: MutableSharedFlow<T> = MutableSharedFlow(0)
-    val eventStream: SharedFlow<T> = _eventStream.asSharedFlow()
+class Interactor<Event> : ViewModel() {
+    private val _eventStream: MutableSharedFlow<DialogInteraction<Event>> = MutableSharedFlow(0)
+    fun eventStream(onPositive: (Event).() -> Unit, onNegative: (Event).() -> Unit): Flow<DialogInteraction<Event>> = _eventStream.onEach {
+        when (it) {
+            is DialogInteraction.Negative -> onNegative(it.event)
+            is DialogInteraction.Positive -> onPositive(it.event)
+        }
+    }
 
-    fun send(event: T) {
+    fun send(event: DialogInteraction<Event>) {
         viewModelScope.launch { _eventStream.emit(event) }
     }
 }
 
-fun <T> Fragment.dialogInteractor(factoryProducer: (() -> ViewModelProvider.Factory)? = null): Lazy<Interactor<DialogInteractorEvent<T>>> =
-        createViewModelLazy(Interactor<DialogInteractorEvent<T>>()::class, { this.viewModelStore }, factoryProducer)
+fun <T> Fragment.dialogInteractor(factoryProducer: (() -> ViewModelProvider.Factory)? = null): Lazy<Interactor<T>> =
+        createViewModelLazy(Interactor<T>()::class, { this.viewModelStore }, factoryProducer)
 
 fun <T> DialogFragment.dialogInteractor(factoryProducer: (() -> ViewModelProvider.Factory)? = null): Lazy<Interactor<T>> =
         createViewModelLazy(Interactor<T>()::class, { requireParentFragment().viewModelStore }, factoryProducer)

@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
-import com.example.new_dialog_architecture.arch.DialogInteractorEvent.Positive
+import com.example.new_dialog_architecture.arch.DialogInteraction.Positive
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onEach
@@ -29,7 +29,7 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
         }
     }
 
-    override fun interact(event: DialogInteractorEvent<Event>) {
+    override fun interact(event: DialogInteraction<Event>) {
         interactor.send(event)
         dismissAllowingStateLoss()
     }
@@ -42,7 +42,7 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
     }
 
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
-    private val interactor: Interactor<DialogInteractorEvent<Event>> by dialogInteractor()
+    private val interactor: Interactor<Event> by dialogInteractor()
     private var initialState: State? = null
 
 
@@ -135,8 +135,6 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
 
         }
     }
-
-
 }
 
 

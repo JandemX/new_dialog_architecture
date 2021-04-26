@@ -1,5 +1,6 @@
 package com.example.new_dialog_architecture.arch
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,13 +35,13 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
         viewModel.stateSubject.compareAndSet(state, newState)
     }
 
-    override fun interact(event: DialogInteractorEvent<Event>) {
+    override fun interact(event: DialogInteraction<Event>) {
         interactor.send(event)
         dismissAllowingStateLoss()
     }
 
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
-    private val interactor: Interactor<DialogInteractorEvent<Event>> by dialogInteractor()
+    private val interactor: Interactor<Event> by dialogInteractor()
     private var initialState: State? = null
 
     private lateinit var title: TextView
@@ -69,13 +70,18 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
                         .drop(1)
                         .onEach {
                             onPositiveAction(it)?.run {
-                                interact(DialogInteractorEvent.Positive(this))
+                                interact(DialogInteraction.Positive(this))
                             }
                         }.collect()
             }
         }
 
         return mainView
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        onNegativeAction()
+        super.onDismiss(dialog)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
