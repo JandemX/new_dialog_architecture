@@ -1,4 +1,4 @@
-package com.example.new_dialog_architecture.ui.main.di
+package com.example.new_dialog_architecture.arch
 
 import android.content.Context
 import android.os.Bundle
@@ -8,7 +8,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.example.new_dialog_architecture.ui.main.DialogView
 import com.example.new_dialog_architecture.ui.main.StateDialog
-import com.example.new_dialog_architecture.ui.main.StateFullInteractionDialog
+import com.example.new_dialog_architecture.arch.StateFullInteractionDialog
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty

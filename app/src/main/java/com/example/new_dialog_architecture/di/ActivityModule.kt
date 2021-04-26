@@ -1,8 +1,7 @@
-package com.example.new_dialog_architecture.ui.main.di
+package com.example.new_dialog_architecture.di
 
 import com.example.new_dialog_architecture.MainActivity
-import com.example.new_dialog_architecture.ui.main.di.scopes.ActivityScope
-import com.example.new_dialog_architecture.ui.main.di.scopes.TestScope
+import com.example.new_dialog_architecture.di.scopes.ActivityScope
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 

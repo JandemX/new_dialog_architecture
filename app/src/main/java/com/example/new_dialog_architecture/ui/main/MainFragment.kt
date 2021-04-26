@@ -8,7 +8,8 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
-import com.example.new_dialog_architecture.ui.main.di.DialogBuilder.Companion.dialog
+import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.dialog
+import com.example.new_dialog_architecture.arch.dialogInteractor
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect

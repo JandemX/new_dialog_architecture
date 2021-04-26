@@ -1,7 +1,7 @@
-package com.example.new_dialog_architecture.ui.main.di
+package com.example.new_dialog_architecture.di
 
 import com.example.new_dialog_architecture.ui.main.MainFragment
-import com.example.new_dialog_architecture.ui.main.di.scopes.FragmentScope
+import com.example.new_dialog_architecture.di.scopes.FragmentScope
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 

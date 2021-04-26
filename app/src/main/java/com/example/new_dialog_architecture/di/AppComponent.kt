@@ -1,4 +1,4 @@
-package com.example.new_dialog_architecture.ui.main.di
+package com.example.new_dialog_architecture.di
 
 import android.app.Application
 import dagger.BindsInstance
