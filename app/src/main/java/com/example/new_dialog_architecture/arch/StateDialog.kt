@@ -1,5 +1,7 @@
 package com.example.new_dialog_architecture.arch
 
+import kotlinx.android.parcel.Parcelize
+
 interface StateDialog<Event, State> {
     val state: State?
     fun updateState(newState: State)

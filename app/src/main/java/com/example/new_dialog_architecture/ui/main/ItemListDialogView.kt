@@ -5,18 +5,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogView
-import com.example.new_dialog_architecture.arch.StateDialog
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 class ItemListDialogView : DialogView<MainDialogEvents, ListDialogState> {
     override val layoutId: Int = R.layout.dialog_list_content
 
-    override fun setView(view: View, dialog: StateDialog<MainDialogEvents, ListDialogState>) {
+    override fun newView(view: View, state: ListDialogState, update: (ListDialogState) -> Unit) {
         val recycler = view.findViewById<RecyclerView>(R.id.simple_recycler)
-        dialog.state?.possible?.run {
+        state.possible.run {
             recycler.apply {
                 layoutManager = LinearLayoutManager(view.context)
                 adapter = SomeAdapter(this@run) {
-                    dialog.updateState(dialog.state!!.copy(selected = it))
+                    update(state.copy(selected = it))
                 }
             }
         }

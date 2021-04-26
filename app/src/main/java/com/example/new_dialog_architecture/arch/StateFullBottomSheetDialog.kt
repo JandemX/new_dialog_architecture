@@ -42,7 +42,7 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
         dismissAllowingStateLoss()
     }
 
-    private lateinit var customView: (View, StateDialog<Event, State>) -> Unit
+    private var customView: DialogView<Event, State> by argument()
 
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
     private val interactor: Interactor<Event> by dialogInteractor()
@@ -99,14 +99,16 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
         }
         positiveButton.isVisible = false
         title.isVisible = false
-        customView(view, this)
+        customView.newView(view, state!!) {
+            updateState(it)
+        }
     }
 
     companion object {
         fun <Event, State> newInstance(
                 layoutid: Int,
                 initialState: State?,
-                customView: (View, StateDialog<Event, State>) -> Unit,
+                customView: DialogView<Event, State>,
                 onPositiveAction: (State?) -> Event?,
                 onNegativeAction: () -> Unit,
                 title: String,

@@ -12,14 +12,12 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogInteraction.Positive
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onEach
@@ -56,7 +54,8 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
 
     private var layout: Int by argument()
 
-    private lateinit var customView: (View, StateDialog<Event, State>) -> Unit
+    private var customView: DialogView<Event, State> by argument()
+
     private var onPositiveAction: (State?) -> Event? by argument()
     private var onNegativeAction: () -> Unit by argument()
     private var dialogTitle: String by argument()
@@ -92,7 +91,9 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
             title = findViewById(R.id.dialog_title)
         }
 
-        customView(view, this)
+        customView.newView(view, state!!) {
+            updateState(it)
+        }
         positiveButton.apply {
             isVisible = !immediateUpdate
             text = positiveButtonText
@@ -123,7 +124,7 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
         fun <Event, State> newInstance(
                 layoutid: Int,
                 initialState: State?,
-                customView: (View, StateDialog<Event, State>) -> Unit,
+                customView: DialogView<Event, State>,
                 onPositiveAction: (State?) -> Event?,
                 onNegativeAction: () -> Unit,
                 title: String,

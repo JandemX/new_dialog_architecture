@@ -1,6 +1,7 @@
 package com.example.new_dialog_architecture.ui.main
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 
 class MainFragment : DaggerFragment() {
 
@@ -91,8 +93,13 @@ class MainFragment : DaggerFragment() {
     }
 }
 
-
 sealed class MainDialogEvents
-data class Data(val string: String) : MainDialogEvents()
-data class CheckboxState(val possible: List<String>, val selected: String? = null) : MainDialogEvents()
-data class ListDialogState(val possible: List<String> = emptyList(), val selected: String? = null) : MainDialogEvents()
+
+@Parcelize
+data class Data(val string: String) : MainDialogEvents(), Parcelable
+
+@Parcelize
+data class CheckboxState(val possible: List<String>, val selected: String? = null) : MainDialogEvents(), Parcelable
+
+@Parcelize
+data class ListDialogState(val possible: List<String> = emptyList(), val selected: String? = null) : MainDialogEvents(), Parcelable

@@ -1,10 +1,12 @@
 package com.example.new_dialog_architecture.arch
 
+import android.os.Parcelable
 import android.view.View
+import kotlinx.parcelize.IgnoredOnParcel
 
-interface DialogView<Event, State> {
+interface DialogView<Event, State>: Parcelable {
     val layoutId: Int
-    fun setView(view: View, dialog: StateDialog<Event, State>)
+    fun newView(view: View, state: State, update: (State) -> Unit)
 }
 
 

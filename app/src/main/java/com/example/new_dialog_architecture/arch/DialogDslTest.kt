@@ -2,21 +2,21 @@ package com.example.new_dialog_architecture.arch
 
 import android.content.Context
 import android.os.Bundle
-import android.view.View
+import android.os.Parcelable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import java.io.Serializable
 import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KFunction2
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
-data class DialogBuilder<Event, State>(
+data class DialogBuilder<Event, State : Parcelable>(
         val alertContext: Context,
         val layoutId: Int,
         val initialState: State,
-        val setCustomView: (View, StateDialog<Event, State>) -> Unit,
+        val setCustomView: DialogView<Event, State>,
         val onPositiveAction: (State?) -> Event?,
         val onNegativeAction: () -> Unit,
         val dialogTitle: String,
@@ -64,11 +64,11 @@ data class DialogBuilder<Event, State>(
             singleChoice
     )
 
-    class Builder<Event, State>(context: Context, view: DialogView<Event, State>) {
+    class Builder<Event, State : Parcelable>(context: Context, view: DialogView<Event, State>) {
         val alertContext: Context = context
         val layoutId: Int = view.layoutId
 
-        var contentView: KFunction2<View, StateDialog<Event, State>, Unit> = view::setView
+        var contentView: DialogView<Event, State> = view
 
         var initialState: State? = null
 
@@ -87,11 +87,11 @@ data class DialogBuilder<Event, State>(
     }
 
     companion object {
-        fun <Event, State> Fragment.dialog(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): DialogFragment {
+        fun <Event, State : Parcelable> Fragment.dialog(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): DialogFragment {
             return Builder(this.requireContext(), view).apply { block() }.build()
         }
 
-        fun <Event, State> Fragment.bottomSheet(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): BottomSheetDialogFragment {
+        fun <Event, State : Parcelable> Fragment.bottomSheet(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): BottomSheetDialogFragment {
             return Builder(this.requireContext(), view).apply { block() }.buildBottomSheet()
         }
     }
