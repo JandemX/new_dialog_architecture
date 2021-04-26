@@ -10,9 +10,9 @@ import kotlinx.parcelize.Parcelize
 class SimpleAlertDialogView : DialogView<MainDialogEvents, String> {
 
     override val layoutId: Int = R.layout.some_information_dialog_content
-
-    override fun newView(view: View, state: String, update: (String) -> Unit) {
+    override fun newView(view: View, state: () -> String, update: (String) -> Unit) {
         val text: TextView = view.findViewById(R.id.alert)
         text.text = "ALARM ALARM"
     }
+
 }

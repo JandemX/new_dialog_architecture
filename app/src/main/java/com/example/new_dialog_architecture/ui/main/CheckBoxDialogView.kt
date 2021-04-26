@@ -8,19 +8,19 @@ import com.example.new_dialog_architecture.arch.DialogView
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class CheckBoxDialogView : DialogView<MainDialogEvents, CheckboxState> {
+class CheckBoxDialogView : DialogView<MainDialogEvents, MultiCheckboxState> {
     override val layoutId: Int = R.layout.some_dialog_content
-
-    override fun newView(view: View, state: CheckboxState, update: (CheckboxState) -> Unit) {
+    override fun newView(view: View, state: () -> MultiCheckboxState, update: (MultiCheckboxState) -> Unit) {
         val list: LinearLayout = view.findViewById(R.id.checkbox_list)
-        state.possible.forEach {
+        state().possible.forEach {
             val checkbox = CheckBox(list.context)
             checkbox.text = it
-            checkbox.isChecked = state.selected?.contains(it) ?: false
+            checkbox.isChecked = state().selected.contains(it)
             checkbox.setOnCheckedChangeListener { _, isChecked ->
-                update(state.copy(selected = it))
+                update(state().copy(selected = state().selected + listOf(it)))
             }
             list.addView(checkbox)
         }
     }
+
 }

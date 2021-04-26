@@ -91,7 +91,7 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
             title = findViewById(R.id.dialog_title)
         }
 
-        customView.newView(view, state!!) {
+        customView.newView(view, { state!! }) {
             updateState(it)
         }
         positiveButton.apply {

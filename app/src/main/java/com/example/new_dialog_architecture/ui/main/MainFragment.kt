@@ -48,10 +48,9 @@ class MainFragment : DaggerFragment() {
             childFragmentManager.beginTransaction().apply {
                 dialog(CheckBoxDialogView()) {
                     dialogTitle = "Simple Checkbox Dialog"
-                    initialState = CheckboxState(List(5) { "checkbox$it" }, "checkbox1")
+                    initialState = MultiCheckboxState(List(5) { "checkbox$it" })
                     positiveButtonText = "Positive"
                     onPositiveAction = { it }
-                    singleChoice = true
                 }.show(this, "test")
             }
         }
@@ -59,7 +58,7 @@ class MainFragment : DaggerFragment() {
         buttonBottomSheetCheckbox.setOnClickListener {
             childFragmentManager.beginTransaction().apply {
                 bottomSheet(CheckBoxDialogView()) {
-                    initialState = CheckboxState(List(5) { "checkbox$it" }, "checkbox1")
+                    initialState = MultiCheckboxState(List(5) { "checkbox$it" })
                 }.show(this, "test")
             }
         }
@@ -69,7 +68,6 @@ class MainFragment : DaggerFragment() {
                 bottomSheet(ItemListDialogView()) {
                     initialState = ListDialogState(List(5) { "listitem$it" })
                     onPositiveAction = { it }
-                    singleChoice = true
                 }.show(this, "test")
             }
         }
@@ -100,6 +98,9 @@ data class Data(val string: String) : MainDialogEvents(), Parcelable
 
 @Parcelize
 data class CheckboxState(val possible: List<String>, val selected: String? = null) : MainDialogEvents(), Parcelable
+
+@Parcelize
+data class MultiCheckboxState(val possible: List<String>, val selected: List<String> = emptyList()) : MainDialogEvents(), Parcelable
 
 @Parcelize
 data class ListDialogState(val possible: List<String> = emptyList(), val selected: String? = null) : MainDialogEvents(), Parcelable
