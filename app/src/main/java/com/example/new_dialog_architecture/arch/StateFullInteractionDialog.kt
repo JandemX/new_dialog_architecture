@@ -1,5 +1,6 @@
 package com.example.new_dialog_architecture.arch
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,10 +9,17 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialogFragment
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
+import com.example.new_dialog_architecture.arch.DialogInteractorEvent.Positive
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppCompatDialogFragment() {
 
@@ -19,6 +27,11 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return SimpleInteractionDialogVM(initialState) as T
         }
+    }
+
+    override fun interact(event: DialogInteractorEvent<Event>) {
+        interactor.send(event)
+        dismissAllowingStateLoss()
     }
 
     override val state: State?
@@ -45,11 +58,28 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
     private var positiveButtonText: String by argument()
     private var negativeButtonText: String by argument()
 
+    private var cancellable: Boolean by argument()
+
+    private var immediateUpdate: Boolean by argument()
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val mainView = inflater.inflate(R.layout.dialog_scaffold, container, false)
         val contentView = inflater.inflate(layout, container, false)
         val mainviewContent = mainView.findViewById<FrameLayout>(R.id.my_content)
         mainviewContent.addView(contentView)
+
+        if (immediateUpdate) {
+            lifecycleScope.launch {
+                viewModel.stateStream
+                        .drop(1)
+                        .onEach {
+                            onPositiveAction(it)?.run {
+                                interact(Positive(this))
+                            }
+                        }.collect()
+            }
+        }
 
         return mainView
     }
@@ -62,10 +92,11 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
 
         customView(view, this)
         positiveButton.apply {
+            isVisible = !immediateUpdate
             text = positiveButtonText
             setOnClickListener {
                 onPositiveAction(viewModel.stateStream.value)?.run {
-                    interactor.send(DialogInteractorEvent.Positive(this))
+                    interact(Positive(this))
                 }
                 dismissAllowingStateLoss()
             }
@@ -73,11 +104,9 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
         title.text = dialogTitle
     }
 
-    private fun ViewGroup.replaceView(now: View, toBe: View) {
-        val index = indexOfChild(now)
-        removeView(now)
-        removeView(toBe)
-        addView(toBe, index)
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        this.isCancelable = cancellable
+        return super.onCreateDialog(savedInstanceState)
     }
 
     companion object {
@@ -89,7 +118,9 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
                 onNegativeAction: () -> Unit,
                 title: String,
                 positiveText: String,
-                negativeText: String
+                negativeText: String,
+                cancellable: Boolean,
+                immediateUpdate: Boolean,
         ): StateFullInteractionDialog<Event, State> = StateFullInteractionDialog<Event, State>().apply {
             layout = layoutid
             this.initialState = initialState
@@ -99,8 +130,12 @@ class StateFullInteractionDialog<Event, State> : StateDialog<Event, State>, AppC
             this.dialogTitle = title
             this.positiveButtonText = positiveText
             this.negativeButtonText = negativeText
+            this.cancellable = cancellable
+            this.immediateUpdate = immediateUpdate
+
         }
     }
+
 
 }
 

@@ -5,6 +5,7 @@ package com.example.new_dialog_architecture.arch
 interface StateDialog<Event, State> {
     val state: State?
     fun updateState(newState: State)
+    fun interact(event: DialogInteractorEvent<Event>)
 }
 
 sealed class DialogInteractorEvent<Event> {

@@ -18,8 +18,7 @@ class CheckBoxDialogView : DialogView<MainDialogEvents, CheckboxState> {
             checkbox.isChecked = dialog.state?.selected?.contains(it) ?: false
             checkbox.setOnCheckedChangeListener { _, isChecked ->
                 val currentstate = dialog.state ?: CheckboxState(emptyList())
-                val combinedSelected: List<String> = if (isChecked) currentstate.selected.plus(listOf(it)) else currentstate.selected.minus(listOf(it))
-                dialog.updateState(currentstate.copy(selected = combinedSelected))
+                dialog.updateState(currentstate.copy(selected = it))
             }
             list.addView(checkbox)
         }

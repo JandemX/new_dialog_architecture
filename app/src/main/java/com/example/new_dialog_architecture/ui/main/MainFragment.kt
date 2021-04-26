@@ -40,14 +40,12 @@ class MainFragment : DaggerFragment() {
         button.setOnClickListener {
             button.text = "test"
             childFragmentManager.beginTransaction().apply {
-
-                dialog(SimpleAlertDialogView()) {
-                    dialogTitle = "Alert dialog"
-                    initialState = ""
+                dialog(CheckBoxDialogView()) {
+                    dialogTitle = "Simple Checkbox Dialog"
+                    initialState = CheckboxState(List(5) { "checkbox$it" }, "checkbox1")
                     positiveButtonText = "Positive"
-                    onPositiveAction = {
-                        it?.let { Data("its a me ") }
-                    }
+                    onPositiveAction = { it }
+                    singleChoice = true
                 }
 
                 bottomSheet(SimpleAlertDialogView()) {
@@ -57,14 +55,15 @@ class MainFragment : DaggerFragment() {
                     onPositiveAction = {
                         it?.let { Data("its a me ") }
                     }
-                }
+                }.show(this, "test")
 
                 bottomSheet(CheckBoxDialogView()) {
                     dialogTitle = "Simple Checkbox Dialog"
                     initialState = CheckboxState(List(5) { "checkbox$it" })
                     positiveButtonText = "positive"
                     onPositiveAction = { it }
-                }.show(this, "test")
+                    singleChoice = true
+                }
             }
             childFragmentManager.executePendingTransactions()
         }
@@ -90,7 +89,7 @@ class MainFragment : DaggerFragment() {
                 is DialogInteractorEvent.Positive -> {
                     when (it.data) {
                         is CheckboxState -> {
-                            button.text = it.data.selected.toString()
+                            button.text = it.data.selected ?: ""
                         }
                         is Data -> {
                             button.text = it.data.string
@@ -109,4 +108,4 @@ class MainFragment : DaggerFragment() {
 
 sealed class MainDialogEvents
 data class Data(val string: String) : MainDialogEvents()
-data class CheckboxState(val possible: List<String>, val selected: List<String> = emptyList()) : MainDialogEvents()
+data class CheckboxState(val possible: List<String>, val selected: String? = null) : MainDialogEvents()

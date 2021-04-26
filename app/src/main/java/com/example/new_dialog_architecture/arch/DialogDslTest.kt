@@ -21,6 +21,8 @@ data class DialogBuilder<Event, State>(
         val dialogTitle: String,
         val positiveButtonText: String,
         val negativeButtonText: String,
+        val cancellable: Boolean,
+        val singleChoice: Boolean,
 ) {
     constructor(builder: Builder<Event, State>) : this(
             builder.alertContext,
@@ -32,10 +34,34 @@ data class DialogBuilder<Event, State>(
             builder.dialogTitle,
             builder.positiveButtonText,
             builder.negativeButtonText,
+            builder.cancellable,
+            builder.singleChoice
     )
 
-    fun build() = StateFullInteractionDialog.newInstance(layoutId, initialState, setCustomView, onPositiveAction, onNegativeAction, dialogTitle, positiveButtonText, negativeButtonText)
-    fun buildBottomSheet() = StateFullBottomSheetDialog.newInstance(layoutId, initialState, setCustomView, onPositiveAction, onNegativeAction, dialogTitle, positiveButtonText, negativeButtonText)
+    fun build() = StateFullInteractionDialog.newInstance(
+            layoutId,
+            initialState,
+            setCustomView,
+            onPositiveAction,
+            onNegativeAction,
+            dialogTitle,
+            positiveButtonText,
+            negativeButtonText,
+            cancellable,
+            singleChoice
+    )
+
+    fun buildBottomSheet() = StateFullBottomSheetDialog.newInstance(
+            layoutId,
+            initialState,
+            setCustomView,
+            onPositiveAction,
+            onNegativeAction,
+            dialogTitle,
+            positiveButtonText,
+            negativeButtonText,
+            singleChoice
+    )
 
     companion object {
         fun <Event, State> Fragment.dialog(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): DialogFragment {
@@ -61,6 +87,9 @@ class Builder<Event, State>(context: Context, private val view: DialogView<Event
 
     var onPositiveAction: (State?) -> Event? = { null }
     var onNegativeAction: () -> Unit = {}
+
+    var cancellable: Boolean = true
+    var singleChoice: Boolean = false
 
     fun build() = DialogBuilder(this).build()
     fun buildBottomSheet() = DialogBuilder(this).buildBottomSheet()

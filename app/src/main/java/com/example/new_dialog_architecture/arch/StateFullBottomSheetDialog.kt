@@ -7,11 +7,17 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, BottomSheetDialogFragment() {
 
@@ -26,6 +32,11 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
 
     override fun updateState(newState: State) {
         viewModel.stateSubject.compareAndSet(state, newState)
+    }
+
+    override fun interact(event: DialogInteractorEvent<Event>) {
+        interactor.send(event)
+        dismissAllowingStateLoss()
     }
 
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
@@ -44,11 +55,25 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
     private var positiveButtonText: String by argument()
     private var negativeButtonText: String by argument()
 
+    private var singleChoice: Boolean by argument()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val mainView = inflater.inflate(R.layout.dialog_scaffold, container, false)
         val contentView = inflater.inflate(layout, container, false)
         val mainviewContent = mainView.findViewById<FrameLayout>(R.id.my_content)
         mainviewContent.addView(contentView)
+
+        if (singleChoice) {
+            lifecycleScope.launch {
+                viewModel.stateStream
+                        .drop(1)
+                        .onEach {
+                            onPositiveAction(it)?.run {
+                                interact(DialogInteractorEvent.Positive(this))
+                            }
+                        }.collect()
+            }
+        }
 
         return mainView
     }
@@ -58,18 +83,9 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
             positiveButton = findViewById(R.id.positive_button)
             title = findViewById(R.id.dialog_title)
         }
-
+        positiveButton.isVisible = false
+        title.isVisible = false
         customView(view, this)
-        positiveButton.apply {
-            text = positiveButtonText
-            setOnClickListener {
-                onPositiveAction(viewModel.stateStream.value)?.run {
-                    interactor.send(DialogInteractorEvent.Positive(this))
-                }
-                dismissAllowingStateLoss()
-            }
-        }
-        title.text = dialogTitle
     }
 
     companion object {
@@ -81,7 +97,8 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
                 onNegativeAction: () -> Unit,
                 title: String,
                 positiveText: String,
-                negativeText: String
+                negativeText: String,
+                singleChoice: Boolean,
         ): StateFullBottomSheetDialog<Event, State> = StateFullBottomSheetDialog<Event, State>().apply {
             layout = layoutid
             this.initialState = initialState
@@ -91,6 +108,7 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
             this.dialogTitle = title
             this.positiveButtonText = positiveText
             this.negativeButtonText = negativeText
+            this.singleChoice = singleChoice
         }
     }
 }
