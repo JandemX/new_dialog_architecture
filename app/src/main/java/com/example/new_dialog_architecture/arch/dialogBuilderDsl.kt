@@ -1,5 +1,6 @@
 package com.example.new_dialog_architecture.arch
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
@@ -44,12 +45,11 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
 
 
     companion object {
-        fun <Event, State : Any> Fragment.dialog(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment {
-            return with(DialogBuilder(requireContext(), view).apply(block).build()) {
+        private fun <Event, State : Any> Dialog<Event, State>.createDialog() =
                 StateFullInteractionDialog.newInstance(
                         layoutid = layoutId,
                         initialState = initialState,
-                        customView = this.contentView,
+                        customView = contentView,
                         onPositiveAction = buttons.onPositiveAction,
                         onNegativeAction = buttons.onNegativeAction,
                         title = dialogTitle,
@@ -58,27 +58,32 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
                         cancellable = additional.cancellable,
                         singleChoice = additional.singleChoice
                 )
-            }
-        }
 
-        fun <Event, State : Any> Fragment.bottomSheet(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment {
-            return with(DialogBuilder(requireContext(), view).apply(block).build()) {
-                StateFullInteractionDialog.newInstance(
-                        layoutid = layoutId,
-                        initialState = initialState,
-                        customView = this.contentView,
-                        onPositiveAction = buttons.onPositiveAction,
-                        onNegativeAction = buttons.onNegativeAction,
-                        title = dialogTitle,
-                        positiveText = buttons.positiveButtonText,
-                        negativeText = buttons.negativeButtonText,
-                        cancellable = additional.cancellable,
-                        singleChoice = additional.singleChoice
-                )
-            }
-        }
+        private fun <Event, State : Any> Dialog<Event, State>.createBottomSheet() = StateFullInteractionDialog.newInstance(
+                layoutid = layoutId,
+                initialState = initialState,
+                customView = contentView,
+                onPositiveAction = buttons.onPositiveAction,
+                onNegativeAction = buttons.onNegativeAction,
+                title = dialogTitle,
+                positiveText = buttons.positiveButtonText,
+                negativeText = buttons.negativeButtonText,
+                cancellable = additional.cancellable,
+                singleChoice = additional.singleChoice
+        )
+
+        fun <Event, State : Any> Fragment.dialog(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder(requireContext(), view).apply(block).build().createDialog()
+
+        fun <Event, State : Any> Fragment.bottomSheet(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder(requireContext(), view).apply(block).build().createBottomSheet()
+
+        fun <Event, State : Any> Activity.dialog(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder(this.applicationContext, view).apply(block).build().createDialog()
+
+        fun <Event, State : Any> Activity.bottomSheet(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder(this.applicationContext, view).apply(block).build().createBottomSheet()
     }
-
 }
 
 @DialogBuilderDsl
