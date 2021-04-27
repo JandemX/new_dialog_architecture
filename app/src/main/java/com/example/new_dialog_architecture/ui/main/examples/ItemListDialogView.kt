@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 class ItemListDialogView : DialogView<MainDialogEvents, ListDialogState> {
     override val layoutId: Int = R.layout.dialog_list_content
-    override fun setView(view: View, state: () -> ListDialogState, update: (ListDialogState) -> Unit) {
+    override fun bind(view: View, state: () -> ListDialogState, update: (ListDialogState) -> Unit) {
         val recycler = view.findViewById<RecyclerView>(R.id.simple_recycler)
         state().possible.run {
             recycler.apply {

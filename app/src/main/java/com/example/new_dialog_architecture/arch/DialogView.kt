@@ -5,7 +5,5 @@ import android.view.View
 
 interface DialogView<Event, State> : Parcelable {
     val layoutId: Int
-    fun setView(view: View, state: () -> State, update: (State) -> Unit)
+    fun bind(view: View, state: () -> State, update: (State) -> Unit)
 }
-
-

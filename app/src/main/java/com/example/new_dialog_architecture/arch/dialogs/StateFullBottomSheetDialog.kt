@@ -104,7 +104,7 @@ class StateFullBottomSheetDialog<Event, State : Any> : StateDialog<Event, State>
         }
         positiveButton.isVisible = false
         title.isVisible = false
-        customView.setView(
+        customView.bind(
                 view = view,
                 state = ::state,
                 update = ::updateState

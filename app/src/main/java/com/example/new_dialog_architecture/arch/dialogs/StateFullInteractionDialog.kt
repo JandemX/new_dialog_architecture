@@ -50,17 +50,14 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
 
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
     private val interactor: Interactor<Event> by dialogInteractor()
-    private lateinit var initialState: State
-
 
     private lateinit var title: TextView
     private lateinit var positiveButton: Button
     private lateinit var negativeButton: Button
 
-    private var layout: Int by argument()
-
     private var customView: DialogView<Event, State> by argument()
-
+    private var layout: Int by argument()
+    private var initialState: State by argument()
     private var onPositiveAction: ((State) -> Event)? by argument()
     private var onNegativeAction: () -> Unit by argument()
     private var dialogTitle: String by argument()
@@ -96,11 +93,12 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
             title = findViewById(R.id.dialog_title)
         }
 
-        customView.setView(
+        customView.bind(
                 view = view,
                 state = ::state,
                 update = ::updateState
         )
+
         positiveButton.apply {
             isVisible = !singleChoice
             text = positiveButtonText
