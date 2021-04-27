@@ -88,3 +88,21 @@ MainFragment {
                 }
 
 ````
+
+
+3. handle dialogevents on MainFragment:
+
+```kotlin
+private suspend fun collectDialogEvents() {
+        interactor.eventStream(
+                onPositive = {
+                    when (this) {
+                        is MultiCheckboxState -> {
+                            buttonDialogCheckbox.text = selected.toString()
+                        }
+                    }
+                },
+                onNegative = {}
+        ).flowOn(Dispatchers.Main).collect()
+    }
+```
