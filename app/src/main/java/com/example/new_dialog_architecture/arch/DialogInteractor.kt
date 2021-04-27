@@ -6,7 +6,6 @@ import androidx.fragment.app.createViewModelLazy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.new_dialog_architecture.arch.dialogs.DialogInteraction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onEach
@@ -24,6 +23,11 @@ class Interactor<Event> : ViewModel() {
     fun send(event: DialogInteraction<Event>) {
         viewModelScope.launch { _eventStream.emit(event) }
     }
+}
+
+sealed class DialogInteraction<Event> {
+    data class Positive<Event>(val event: Event) : DialogInteraction<Event>()
+    class Negative<Event>(val event: Event) : DialogInteraction<Event>()
 }
 
 fun <T> Fragment.dialogInteractor(factoryProducer: (() -> ViewModelProvider.Factory)? = null): Lazy<Interactor<T>> =

@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
+import com.example.new_dialog_architecture.arch.DialogBuilder
 import com.example.new_dialog_architecture.arch.DialogView
 import com.example.new_dialog_architecture.arch.Interactor
 import com.example.new_dialog_architecture.arch.SimpleInteractionDialogVM
@@ -126,29 +127,17 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
     }
 
     companion object {
-        fun <Event, State : Any> newInstance(
-                layoutid: Int,
-                initialState: State,
-                customView: DialogView<Event, State>,
-                onPositiveAction: ((State) -> Event)?,
-                onNegativeAction: () -> Unit,
-                title: String,
-                positiveText: String,
-                negativeText: String,
-                cancellable: Boolean,
-                singleChoice: Boolean,
-        ): StateFullInteractionDialog<Event, State> = StateFullInteractionDialog<Event, State>().apply {
-            layout = layoutid
-            this.initialState = initialState
-            this.customView = customView
-            this.onPositiveAction = onPositiveAction
-            this.onNegativeAction = onNegativeAction
-            this.dialogTitle = title
-            this.positiveButtonText = positiveText
-            this.negativeButtonText = negativeText
-            this.cancellable = cancellable
-            this.singleChoice = singleChoice
-
+        fun <Event, State : Any> newInstance(dialogDataData: DialogBuilder.DialogData<Event, State>): StateFullInteractionDialog<Event, State> = StateFullInteractionDialog<Event, State>().apply {
+            layout = dialogDataData.layoutId
+            initialState = dialogDataData.initialState
+            customView = dialogDataData.contentView
+            onPositiveAction = dialogDataData.buttons.onPositiveAction
+            onNegativeAction = dialogDataData.buttons.onNegativeAction
+            dialogTitle = dialogDataData.dialogTitle
+            positiveButtonText = dialogDataData.buttons.positiveButtonText
+            negativeButtonText = dialogDataData.buttons.negativeButtonText
+            cancellable = dialogDataData.additional.cancellable
+            singleChoice = dialogDataData.additional.singleChoice
         }
     }
 }

@@ -77,9 +77,7 @@ class MainFragment : DaggerFragment() {
                     initialState = ListDialogState(List(5) { "listitem$it" })
                     buttons {
                         positiveButtonText = "Positive"
-                        onPositiveAction = {
-                            it
-                        }
+                        onPositiveAction = { it }
                     }
                     additional {
                         singleChoice = true
