@@ -1,5 +1,5 @@
-# new_dialog_architecture
-POC for Dialog Builder DSL. 
+# POC Dialog Builder DSL
+
 
 Goal:
 State needs to be consistent on Rotation or putting app in background
