@@ -111,3 +111,10 @@ private suspend fun collectDialogEvents() {
         ).flowOn(Dispatchers.Main).collect()
     }
 ```
+
+
+
+https://user-images.githubusercontent.com/15572029/116224805-5e3a4a00-a751-11eb-8471-df4ec766df86.mp4
+
+
+
