@@ -27,3 +27,42 @@ builder entity which is responsible for Dialog creation. Minimal arguments are D
 
 
 ![Bildschirmfoto 2021-04-27 um 11 30 28](https://user-images.githubusercontent.com/15572029/116221712-28479680-a74e-11eb-824f-a076c79c3e75.png)
+
+
+
+How to create a Dialog:
+
+````kotlin
+MainFragment {
+....
+
+
+     dialog(DialogView<ThisDialogsEvent, SomeState>) {
+                    dialogTitle = "Simple Checkbox Dialog"
+                    initialState = SomeState()
+                    positiveButtonText = "Positive"
+                    onPositiveAction = { currentState: SomeState
+                        // needs to return a EVENT, can be used to wrap state with event to update fragment with dialogstate
+                        ThisDialogsEvent(currentState)
+                    }
+                }
+
+````
+
+
+How to create a BottomSheet:
+````kotlin
+MainFragment {
+....
+
+      bottomSheet(DialogView<ThisDialogsEvent, SomeState>) {
+                    dialogTitle = "Simple Checkbox Dialog"
+                    initialState = SomeState()
+                    positiveButtonText = "Positive"
+                    onPositiveAction = { currentState: SomeState
+                        // needs to return a EVENT, can be used to wrap state with event to update fragment with dialogstate
+                        ThisDialogsEvent(currentState)
+                    }
+                }
+
+````
