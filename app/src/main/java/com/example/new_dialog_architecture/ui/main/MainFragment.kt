@@ -51,9 +51,9 @@ class MainFragment : DaggerFragment() {
                 dialog(CheckBoxDialogView()) {
                     dialogTitle = "Simple Checkbox Dialog"
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
-                    positiveButtonText = "Positive"
-                    onPositiveAction = {
-                        it
+                    buttons {
+                        positiveButtonText = "Positive"
+                        onPositiveAction = { it }
                     }
                 }.show(this, "test")
             }
@@ -63,7 +63,10 @@ class MainFragment : DaggerFragment() {
             childFragmentManager.beginTransaction().apply {
                 bottomSheet(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
-                    onPositiveAction = { it }
+                    buttons {
+                        positiveButtonText = "Positive"
+                        onPositiveAction = { it }
+                    }
                 }.show(this, "test")
             }
         }
@@ -72,8 +75,16 @@ class MainFragment : DaggerFragment() {
             childFragmentManager.beginTransaction().apply {
                 bottomSheet(ItemListDialogView()) {
                     initialState = ListDialogState(List(5) { "listitem$it" })
-                    onPositiveAction = { it }
-                    singleChoice = true
+                    buttons {
+                        positiveButtonText = "Positive"
+                        onPositiveAction = {
+                            it
+                        }
+                    }
+                    additional {
+                        singleChoice = true
+                        cancellable = true
+                    }
                 }.show(this, "test")
             }
         }

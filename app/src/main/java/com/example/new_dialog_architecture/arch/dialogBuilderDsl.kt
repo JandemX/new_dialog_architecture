@@ -2,102 +2,124 @@ package com.example.new_dialog_architecture.arch
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import com.example.new_dialog_architecture.arch.dialogs.StateFullBottomSheetDialog
 import com.example.new_dialog_architecture.arch.dialogs.StateFullInteractionDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
-data class DialogBuilder<Event, State : Parcelable>(
-        val alertContext: Context,
-        val layoutId: Int,
-        val initialState: State,
-        val setCustomView: DialogView<Event, State>,
-        val onPositiveAction: ((State) -> Event)?,
-        val onNegativeAction: () -> Unit,
-        val dialogTitle: String,
-        val positiveButtonText: String,
-        val negativeButtonText: String,
-        val cancellable: Boolean,
-        val singleChoice: Boolean,
-) {
-    constructor(configuration: Configuration<Event, State>) : this(
-            configuration.alertContext,
-            configuration.layoutId,
-            configuration.initialState,
-            configuration.contentView,
-            configuration.onPositiveAction,
-            configuration.onNegativeAction,
-            configuration.dialogTitle,
-            configuration.positiveButtonText,
-            configuration.negativeButtonText,
-            configuration.cancellable,
-            configuration.singleChoice
-    )
+@DslMarker
+annotation class DialogBuilderDsl
 
-    fun build() = StateFullInteractionDialog.newInstance(
-            layoutId,
-            initialState,
-            setCustomView,
-            onPositiveAction,
-            onNegativeAction,
-            dialogTitle,
-            positiveButtonText,
-            negativeButtonText,
-            cancellable,
-            singleChoice
-    )
+@DialogBuilderDsl
+class DialogBuilder<Event, State : Any>(private val context: Context, private val contentView: DialogView<Event, State>) {
 
-    fun buildBottomSheet() = StateFullBottomSheetDialog.newInstance(
-            layoutId,
-            initialState,
-            setCustomView,
-            onPositiveAction,
-            onNegativeAction,
-            dialogTitle,
-            positiveButtonText,
-            negativeButtonText,
-            singleChoice
-    )
+    private val layoutId: Int = contentView.layoutId
+    private var buttons: DialogButton<Event, State> = DialogButtonsBuilder<Event, State>().build()
+    private var additional: Additional = AdditionalBuilder().build()
 
-    class Configuration<Event, State : Parcelable>(context: Context, view: DialogView<Event, State>) {
+    var dialogTitle: String = ""
 
-        operator fun invoke(): DialogBuilder<Event, State> = DialogBuilder(this)
+    lateinit var initialState: State
 
-        val alertContext: Context = context
-        val layoutId: Int = view.layoutId
-
-        var contentView: DialogView<Event, State> = view
-
-        lateinit var initialState: State
-
-        var dialogTitle: String = ""
-        var positiveButtonText: String = ""
-        var negativeButtonText: String = ""
-
-        var onPositiveAction: ((State) -> Event)? = null
-        var onNegativeAction: () -> Unit = {}
-
-        var cancellable: Boolean = true
-        var singleChoice: Boolean = false
-
+    fun buttons(block: DialogButtonsBuilder<Event, State>.() -> Unit) {
+        buttons = DialogButtonsBuilder<Event, State>().apply(block).build()
     }
+
+    fun additional(block: AdditionalBuilder.() -> Unit) {
+        additional = AdditionalBuilder().apply(block).build()
+    }
+
+    fun build(): Dialog<Event, State> = Dialog(
+            context,
+            layoutId,
+            initialState,
+            dialogTitle,
+            contentView,
+            buttons,
+            additional
+    )
+
 
     companion object {
-        fun <Event, State : Parcelable> Fragment.dialog(view: DialogView<Event, State>, block: Configuration<Event, State>.() -> Unit): DialogFragment {
-            return Configuration(this.requireContext(), view).apply { block() }.invoke().build()
+        fun <Event, State : Any> Fragment.dialog(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment {
+            return with(DialogBuilder(requireContext(), view).apply(block).build()) {
+                StateFullInteractionDialog.newInstance(
+                        layoutid = layoutId,
+                        initialState = initialState,
+                        customView = this.contentView,
+                        onPositiveAction = buttons.onPositiveAction,
+                        onNegativeAction = buttons.onNegativeAction,
+                        title = dialogTitle,
+                        positiveText = buttons.positiveButtonText,
+                        negativeText = buttons.negativeButtonText,
+                        cancellable = additional.cancellable,
+                        singleChoice = additional.singleChoice
+                )
+            }
         }
 
-        fun <Event, State : Parcelable> Fragment.bottomSheet(view: DialogView<Event, State>, block: Configuration<Event, State>.() -> Unit): BottomSheetDialogFragment {
-            return Configuration(this.requireContext(), view).apply { block() }.invoke().buildBottomSheet()
+        fun <Event, State : Any> Fragment.bottomSheet(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment {
+            return with(DialogBuilder(requireContext(), view).apply(block).build()) {
+                StateFullInteractionDialog.newInstance(
+                        layoutid = layoutId,
+                        initialState = initialState,
+                        customView = this.contentView,
+                        onPositiveAction = buttons.onPositiveAction,
+                        onNegativeAction = buttons.onNegativeAction,
+                        title = dialogTitle,
+                        positiveText = buttons.positiveButtonText,
+                        negativeText = buttons.negativeButtonText,
+                        cancellable = additional.cancellable,
+                        singleChoice = additional.singleChoice
+                )
+            }
         }
     }
+
 }
+
+@DialogBuilderDsl
+class AdditionalBuilder {
+    var cancellable: Boolean = true
+    var singleChoice: Boolean = false
+
+    fun build(): Additional = Additional(cancellable, singleChoice)
+}
+
+@DialogBuilderDsl
+class DialogButtonsBuilder<Event, State> {
+    var positiveButtonText: String = ""
+    var negativeButtonText: String = ""
+    var onPositiveAction: ((State) -> Event)? = null
+    var onNegativeAction: (() -> Unit) = {}
+
+    fun build(): DialogButton<Event, State> = DialogButton(positiveButtonText, negativeButtonText, onPositiveAction, onNegativeAction)
+}
+
+data class Dialog<Event, State>(
+        val context: Context,
+        val layoutId: Int,
+        val initialState: State,
+        val dialogTitle: String,
+        val contentView: DialogView<Event, State>,
+        val buttons: DialogButton<Event, State>,
+        val additional: Additional
+)
+
+data class DialogButton<Event, State>(
+        val positiveButtonText: String,
+        val negativeButtonText: String,
+        val onPositiveAction: ((State) -> Event)?,
+        val onNegativeAction: () -> Unit
+)
+
+data class Additional(
+        val cancellable: Boolean,
+        val singleChoice: Boolean,
+)
 
 
 @Suppress("unused")
