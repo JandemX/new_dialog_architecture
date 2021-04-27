@@ -62,7 +62,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
     private var positiveButtonText: String by argument()
     private var negativeButtonText: String by argument()
     private var cancellable: Boolean by argument()
-    private var immediateUpdate: Boolean by argument()
+    private var singleChoice: Boolean by argument()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val mainView = inflater.inflate(R.layout.dialog_scaffold, container, false)
@@ -70,7 +70,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
         val mainviewContent = mainView.findViewById<FrameLayout>(R.id.my_content)
         mainviewContent.addView(contentView)
 
-        if (immediateUpdate) {
+        if (singleChoice) {
             lifecycleScope.launch {
                 viewModel.stateStream
                         .drop(1)
@@ -97,7 +97,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
                 update = ::updateState
         )
         positiveButton.apply {
-            isVisible = !immediateUpdate
+            isVisible = !singleChoice
             text = positiveButtonText
             setOnClickListener {
                 onPositiveAction?.invoke(state)?.run {
@@ -133,7 +133,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
                 positiveText: String,
                 negativeText: String,
                 cancellable: Boolean,
-                immediateUpdate: Boolean,
+                singleChoice: Boolean,
         ): StateFullInteractionDialog<Event, State> = StateFullInteractionDialog<Event, State>().apply {
             layout = layoutid
             this.initialState = initialState
@@ -144,7 +144,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
             this.positiveButtonText = positiveText
             this.negativeButtonText = negativeText
             this.cancellable = cancellable
-            this.immediateUpdate = immediateUpdate
+            this.singleChoice = singleChoice
 
         }
     }

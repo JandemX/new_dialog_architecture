@@ -87,6 +87,11 @@ class MainFragment : DaggerFragment() {
                         is ListDialogState -> {
                             Toast.makeText(this@MainFragment.requireContext(), selected, Toast.LENGTH_LONG).show()
                         }
+                        is CheckboxState -> {
+                        }
+                        is MultiCheckboxState -> {
+                            buttonBottomSheetCheckbox.text = selected.toString()
+                        }
                     }
                 },
                 onNegative = {}
