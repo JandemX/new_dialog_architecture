@@ -63,6 +63,7 @@ class MainFragment : DaggerFragment() {
             childFragmentManager.beginTransaction().apply {
                 bottomSheet(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
+                    onPositiveAction = { it }
                 }.show(this, "test")
             }
         }
@@ -92,7 +93,7 @@ class MainFragment : DaggerFragment() {
                         is CheckboxState -> {
                         }
                         is MultiCheckboxState -> {
-                            buttonBottomSheetCheckbox.text = selected.toString()
+                            buttonDialogCheckbox.text = selected.toString()
                         }
                     }
                 },

@@ -26,18 +26,18 @@ data class DialogBuilder<Event, State : Parcelable>(
         val cancellable: Boolean,
         val singleChoice: Boolean,
 ) {
-    constructor(builder: Builder<Event, State>) : this(
-            builder.alertContext,
-            builder.layoutId,
-            builder.initialState,
-            builder.contentView,
-            builder.onPositiveAction,
-            builder.onNegativeAction,
-            builder.dialogTitle,
-            builder.positiveButtonText,
-            builder.negativeButtonText,
-            builder.cancellable,
-            builder.singleChoice
+    constructor(configuration: Configuration<Event, State>) : this(
+            configuration.alertContext,
+            configuration.layoutId,
+            configuration.initialState,
+            configuration.contentView,
+            configuration.onPositiveAction,
+            configuration.onNegativeAction,
+            configuration.dialogTitle,
+            configuration.positiveButtonText,
+            configuration.negativeButtonText,
+            configuration.cancellable,
+            configuration.singleChoice
     )
 
     fun build() = StateFullInteractionDialog.newInstance(
@@ -65,7 +65,10 @@ data class DialogBuilder<Event, State : Parcelable>(
             singleChoice
     )
 
-    class Builder<Event, State : Parcelable>(context: Context, view: DialogView<Event, State>) {
+    class Configuration<Event, State : Parcelable>(context: Context, view: DialogView<Event, State>) {
+
+        operator fun invoke(): DialogBuilder<Event, State> = DialogBuilder(this)
+
         val alertContext: Context = context
         val layoutId: Int = view.layoutId
 
@@ -83,17 +86,15 @@ data class DialogBuilder<Event, State : Parcelable>(
         var cancellable: Boolean = true
         var singleChoice: Boolean = false
 
-        fun build() = DialogBuilder(this).build()
-        fun buildBottomSheet() = DialogBuilder(this).buildBottomSheet()
     }
 
     companion object {
-        fun <Event, State : Parcelable> Fragment.dialog(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): DialogFragment {
-            return Builder(this.requireContext(), view).apply { block() }.build()
+        fun <Event, State : Parcelable> Fragment.dialog(view: DialogView<Event, State>, block: Configuration<Event, State>.() -> Unit): DialogFragment {
+            return Configuration(this.requireContext(), view).apply { block() }.invoke().build()
         }
 
-        fun <Event, State : Parcelable> Fragment.bottomSheet(view: DialogView<Event, State>, block: Builder<Event, State>.() -> Unit): BottomSheetDialogFragment {
-            return Builder(this.requireContext(), view).apply { block() }.buildBottomSheet()
+        fun <Event, State : Parcelable> Fragment.bottomSheet(view: DialogView<Event, State>, block: Configuration<Event, State>.() -> Unit): BottomSheetDialogFragment {
+            return Configuration(this.requireContext(), view).apply { block() }.invoke().buildBottomSheet()
         }
     }
 }
