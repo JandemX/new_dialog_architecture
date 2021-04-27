@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 
-class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, BottomSheetDialogFragment() {
+class StateFullBottomSheetDialog<Event, State : Any> : StateDialog<Event, State>, BottomSheetDialogFragment() {
 
     private val producer = object : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -30,8 +30,8 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
         }
     }
 
-    override val state: State?
-        get() = viewModel.stateSubject.value
+    override val state: State
+        get() = viewModel.stateSubject.value ?: initialState
 
     override fun updateState(newState: State) {
         viewModel.stateSubject.compareAndSet(state, newState)
@@ -46,14 +46,14 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
 
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
     private val interactor: Interactor<Event> by dialogInteractor()
-    private var initialState: State? = null
+    private lateinit var initialState: State
 
     private lateinit var title: TextView
     private lateinit var positiveButton: Button
     private lateinit var negativeButton: Button
 
     private var layout: Int by argument()
-    private var onPositiveAction: (State?) -> Event? by argument()
+    private var onPositiveAction: ((State) -> Event)? by argument()
     private var onNegativeAction: () -> Unit by argument()
     private var dialogTitle: String by argument()
     private var positiveButtonText: String by argument()
@@ -77,7 +77,7 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
                 viewModel.stateStream
                         .drop(1)
                         .onEach {
-                            onPositiveAction(it)?.run {
+                            onPositiveAction?.invoke(state)?.run {
                                 interact(DialogInteraction.Positive(this))
                             }
                         }.collect()
@@ -99,17 +99,19 @@ class StateFullBottomSheetDialog<Event, State> : StateDialog<Event, State>, Bott
         }
         positiveButton.isVisible = false
         title.isVisible = false
-        customView.newView(view, { state!! }) {
-            updateState(it)
-        }
+        customView.newView(
+                view = view,
+                state = ::state,
+                update = ::updateState
+        )
     }
 
     companion object {
-        fun <Event, State> newInstance(
+        fun <Event, State : Any> newInstance(
                 layoutid: Int,
-                initialState: State?,
+                initialState: State,
                 customView: DialogView<Event, State>,
-                onPositiveAction: (State?) -> Event?,
+                onPositiveAction: ((State) -> Event)?,
                 onNegativeAction: () -> Unit,
                 title: String,
                 positiveText: String,

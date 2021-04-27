@@ -7,7 +7,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import java.io.Serializable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
@@ -17,7 +16,7 @@ data class DialogBuilder<Event, State : Parcelable>(
         val layoutId: Int,
         val initialState: State,
         val setCustomView: DialogView<Event, State>,
-        val onPositiveAction: (State?) -> Event?,
+        val onPositiveAction: ((State) -> Event)?,
         val onNegativeAction: () -> Unit,
         val dialogTitle: String,
         val positiveButtonText: String,
@@ -28,7 +27,7 @@ data class DialogBuilder<Event, State : Parcelable>(
     constructor(builder: Builder<Event, State>) : this(
             builder.alertContext,
             builder.layoutId,
-            builder.initialState!!,
+            builder.initialState,
             builder.contentView,
             builder.onPositiveAction,
             builder.onNegativeAction,
@@ -70,13 +69,13 @@ data class DialogBuilder<Event, State : Parcelable>(
 
         var contentView: DialogView<Event, State> = view
 
-        var initialState: State? = null
+        lateinit var initialState: State
 
         var dialogTitle: String = ""
         var positiveButtonText: String = ""
         var negativeButtonText: String = ""
 
-        var onPositiveAction: (State?) -> Event? = { null }
+        var onPositiveAction: ((State) -> Event)? = null
         var onNegativeAction: () -> Unit = {}
 
         var cancellable: Boolean = true

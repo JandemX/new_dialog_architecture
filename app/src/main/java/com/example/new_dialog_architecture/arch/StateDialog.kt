@@ -2,7 +2,7 @@ package com.example.new_dialog_architecture.arch
 
 import kotlinx.android.parcel.Parcelize
 
-interface StateDialog<Event, State> {
+interface StateDialog<Event, State : Any> {
     val state: State?
     fun updateState(newState: State)
     fun interact(event: DialogInteraction<Event>)
