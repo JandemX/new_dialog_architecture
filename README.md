@@ -1,6 +1,8 @@
 # POC Dialog Builder DSL
 
 
+quick summary 🤔
+
 Goal:
 State needs to be consistent on Rotation or putting app in background
 
