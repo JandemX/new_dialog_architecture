@@ -3,6 +3,7 @@
 
 Goal:
 State needs to be consistent on Rotation or putting app in background
+
 Interaction between Fragment and DialogFragment needs to consistant with rotation or puttin app in background
 avoid repeated Boilerplate code for Dialog creation.
 
