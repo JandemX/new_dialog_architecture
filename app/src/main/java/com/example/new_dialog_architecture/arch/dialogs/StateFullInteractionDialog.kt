@@ -18,12 +18,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogBuilder
+import com.example.new_dialog_architecture.arch.DialogInteraction
+import com.example.new_dialog_architecture.arch.DialogInteraction.*
 import com.example.new_dialog_architecture.arch.DialogView
 import com.example.new_dialog_architecture.arch.Interactor
 import com.example.new_dialog_architecture.arch.SimpleInteractionDialogVM
 import com.example.new_dialog_architecture.arch.argument
 import com.example.new_dialog_architecture.arch.dialogInteractor
-import com.example.new_dialog_architecture.arch.dialogs.DialogInteraction.Positive
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onEach

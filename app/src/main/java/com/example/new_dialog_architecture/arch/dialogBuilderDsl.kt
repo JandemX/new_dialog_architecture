@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import com.example.new_dialog_architecture.arch.dialogs.StateFullBottomSheetDialog
 import com.example.new_dialog_architecture.arch.dialogs.StateFullInteractionDialog
 
 @DslMarker
@@ -81,7 +82,7 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
                 StateFullInteractionDialog.newInstance(this)
 
         private fun <Event, State : Any> DialogData<Event, State>.createBottomSheet() =
-                StateFullInteractionDialog.newInstance(this)
+                StateFullBottomSheetDialog.newInstance(this)
 
         fun <Event, State : Any> Fragment.dialog(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
                 DialogBuilder(requireContext(), view).apply(block).build().createDialog()
