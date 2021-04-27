@@ -32,36 +32,58 @@ builder entity which is responsible for Dialog creation. Minimal arguments are D
 
 How to create a Dialog:
 
+1: create CustomDialogView: for example a checkbox view:
+````kotlin
+class CheckBoxDialogView : DialogView<ThisInteractorEvent, MultiCheckboxState> {
+    override val layoutId: Int = R.layout.some_dialog_content
+    override fun setView(view: View, state: () -> MultiCheckboxState, update: (MultiCheckboxState) -> Unit) {
+        val list: LinearLayout = view.findViewById(R.id.checkbox_list)
+        state().possible.forEach {
+            val checkbox = CheckBox(list.context)
+            checkbox.text = it
+            checkbox.isChecked = state().selected.contains(it)
+            checkbox.setOnCheckedChangeListener { _, isChecked ->
+                val newList = if (isChecked) state().selected + listOf(it) else state().selected - listOf(it)
+                update(state().copy(selected = newList))
+            }
+            list.addView(checkbox)
+        }
+    }
+
+}
+````
+
+2: in the MainFragment call `dialog(CheckBoxDialogView){}` to create the Dialog.
+
 ````kotlin
 MainFragment {
 ....
 
-
-     dialog(DialogView<ThisDialogsEvent, SomeState>) {
+     dialog(DialogView<ThisInteractorEvent, SomeState>) {
                     dialogTitle = "Simple Checkbox Dialog"
                     initialState = SomeState()
                     positiveButtonText = "Positive"
                     onPositiveAction = { currentState: SomeState
                         // needs to return a EVENT, can be used to wrap state with event to update fragment with dialogstate
-                        ThisDialogsEvent(currentState)
+                        ThisInteractorEvent(currentState)
                     }
                 }
 
 ````
 
+or `bottomSheet(CheckBoxDialogView)` to create a bottomSheet with the same checkbox UI
 
-How to create a BottomSheet:
 ````kotlin
 MainFragment {
 ....
 
-      bottomSheet(DialogView<ThisDialogsEvent, SomeState>) {
+      bottomSheet(DialogView<ThisInteractorEvent, SomeState>) {
                     dialogTitle = "Simple Checkbox Dialog"
                     initialState = SomeState()
                     positiveButtonText = "Positive"
                     onPositiveAction = { currentState: SomeState
                         // needs to return a EVENT, can be used to wrap state with event to update fragment with dialogstate
-                        ThisDialogsEvent(currentState)
+                        ThisInteractorEvent(currentState)
                     }
                 }
 
