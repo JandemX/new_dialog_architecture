@@ -1,4 +1,4 @@
-package com.example.new_dialog_architecture.ui.main
+package com.example.new_dialog_architecture.ui.main.examples
 
 import android.view.LayoutInflater
 import android.view.View

@@ -1,4 +1,4 @@
-package com.example.new_dialog_architecture.arch
+package com.example.new_dialog_architecture.arch.dialogs
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -15,6 +15,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
+import com.example.new_dialog_architecture.arch.DialogView
+import com.example.new_dialog_architecture.arch.Interactor
+import com.example.new_dialog_architecture.arch.SimpleInteractionDialogVM
+import com.example.new_dialog_architecture.arch.argument
+import com.example.new_dialog_architecture.arch.dialogInteractor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
@@ -99,7 +104,7 @@ class StateFullBottomSheetDialog<Event, State : Any> : StateDialog<Event, State>
         }
         positiveButton.isVisible = false
         title.isVisible = false
-        customView.newView(
+        customView.setView(
                 view = view,
                 state = ::state,
                 update = ::updateState

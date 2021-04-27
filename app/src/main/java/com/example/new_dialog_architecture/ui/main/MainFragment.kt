@@ -13,6 +13,8 @@ import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.bottomSheet
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.dialog
 import com.example.new_dialog_architecture.arch.dialogInteractor
+import com.example.new_dialog_architecture.ui.main.examples.CheckBoxDialogView
+import com.example.new_dialog_architecture.ui.main.examples.ItemListDialogView
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect

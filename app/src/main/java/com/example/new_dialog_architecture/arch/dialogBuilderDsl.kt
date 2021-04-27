@@ -6,6 +6,8 @@ import android.os.Parcelable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import com.example.new_dialog_architecture.arch.dialogs.StateFullBottomSheetDialog
+import com.example.new_dialog_architecture.arch.dialogs.StateFullInteractionDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0

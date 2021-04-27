@@ -1,6 +1,4 @@
-package com.example.new_dialog_architecture.arch
-
-import kotlinx.android.parcel.Parcelize
+package com.example.new_dialog_architecture.arch.dialogs
 
 interface StateDialog<Event, State : Any> {
     val state: State?
