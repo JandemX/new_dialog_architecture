@@ -1,7 +1,9 @@
 # POC Dialog Builder DSL
 
+this is not final. please take a look try it out and tell me what you think. 
+the goal is to reduce the amount of time and code spent on creating dialogs so if it is too complex to use I went the wrong way 😢
 
-quick summary 🤔
+quick summary 🤔 
 
 Goal:
 State needs to be consistent on Rotation or putting app in background
