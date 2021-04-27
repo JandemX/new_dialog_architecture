@@ -34,6 +34,7 @@ DialogBuilder:
 builder entity which is responsible for Dialog creation. Minimal arguments are DialogView and initialState.
 
 
+this UML is not really a UML just sketch of the arch. lots of fields and classes are not represented in the model.
 
 ![Bildschirmfoto 2021-04-27 um 11 30 28](https://user-images.githubusercontent.com/15572029/116221712-28479680-a74e-11eb-824f-a076c79c3e75.png)
 
