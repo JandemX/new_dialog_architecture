@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +14,9 @@ import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.bottomSheet
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.dialog
 import com.example.new_dialog_architecture.arch.dialogInteractor
+import com.example.new_dialog_architecture.ui.main.MainDialogEvents.BottomSheetCheckboxEvent
+import com.example.new_dialog_architecture.ui.main.MainDialogEvents.CheckboxDialogEvent
+import com.example.new_dialog_architecture.ui.main.MainDialogEvents.ListDialogEvent
 import com.example.new_dialog_architecture.ui.main.examples.CheckBoxDialogView
 import com.example.new_dialog_architecture.ui.main.examples.ItemListDialogView
 import dagger.android.support.DaggerFragment
@@ -49,14 +53,15 @@ class MainFragment : DaggerFragment() {
             buttonDialogCheckbox.text = "test"
 
             openDialog {
-                dialog<MainDialogEvents.CheckboxDialogEvent, MultiCheckboxState>(CheckBoxDialogView()) {
+                dialog<CheckboxDialogEvent, MultiCheckboxState>(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
                     dialogTitle = "Simple Checkbox Dialog"
                     buttons {
                         positiveButtonText = "Positive"
-                        onPositiveAction = {
-                            MainDialogEvents.CheckboxDialogEvent
-                        }
+                        negativeButtonText = "Negative"
+
+                        onPositiveAction = { CheckboxDialogEvent.Positive(it.selected.toString()) }
+                        onNegativeAction = { CheckboxDialogEvent.Negative }
                     }
                 }
             }
@@ -64,13 +69,12 @@ class MainFragment : DaggerFragment() {
 
         buttonBottomSheetCheckbox.setOnClickListener {
             openDialog {
-                bottomSheet<MainDialogEvents.BottomSheetCheckboxEvent, MultiCheckboxState>(CheckBoxDialogView()) {
+                bottomSheet<BottomSheetCheckboxEvent, MultiCheckboxState>(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
                     buttons {
                         positiveButtonText = "Positive"
-                        onPositiveAction = { state ->
-                            MainDialogEvents.BottomSheetCheckboxEvent
-                        }
+                        onPositiveAction = { state -> BottomSheetCheckboxEvent.Positive(state.selected.toString()) }
+                        onNegativeAction = { BottomSheetCheckboxEvent.Negative }
                     }
                 }
             }
@@ -78,16 +82,11 @@ class MainFragment : DaggerFragment() {
 
         buttonBottomSheetList.setOnClickListener {
             openDialog {
-                bottomSheet<MainDialogEvents.ListDialogEvent, ItemListDialogView.ListDialogState>(ItemListDialogView()) {
-                    initialState = ItemListDialogView.ListDialogState(List(5) { "listitem$it" })
+                bottomSheet<ListDialogEvent, ItemListDialogView.ListDialogState>(ItemListDialogView()) {
+                    initialState = ItemListDialogView.ListDialogState(List(20) { "listitem$it" })
                     buttons {
-                        positiveButtonText = "Positive"
-                        onPositiveAction = {
-                            MainDialogEvents.ListDialogEvent
-                        }
-                        onNegativeAction = {
-                            MainDialogEvents.ListDialogEvent
-                        }
+                        onPositiveAction = { ListDialogEvent }
+                        onNegativeAction = { ListDialogEvent }
                     }
                     additional {
                         singleChoice = true
@@ -105,17 +104,14 @@ class MainFragment : DaggerFragment() {
     private suspend fun collectDialogEvents() {
         interactor.eventStream
                 .onEach {
-                    when (it) {
-                        is Data -> {
-                        }
-                    }
+                    Toast.makeText(requireContext(), "$it clicked", Toast.LENGTH_SHORT).show()
                 }.flowOn(Dispatchers.Main).collect()
     }
 
 
     private fun Fragment.openDialog(dialog: () -> DialogFragment) {
         childFragmentManager.beginTransaction().apply {
-            dialog().show(this, "test")
+            dialog().show(this, "test, need to find a solution for this") // TODO: find out for what we could use this tag
         }
         childFragmentManager.executePendingTransactions()
     }
@@ -123,14 +119,17 @@ class MainFragment : DaggerFragment() {
 
 sealed class MainDialogEvents {
     object ListDialogEvent : MainDialogEvents()
-    object CheckboxDialogEvent : MainDialogEvents()
-    object BottomSheetCheckboxEvent : MainDialogEvents()
+    sealed class CheckboxDialogEvent : MainDialogEvents() {
+        data class Positive(val data: String) : CheckboxDialogEvent()
+        object Negative : CheckboxDialogEvent()
+    }
+
+    sealed class BottomSheetCheckboxEvent : MainDialogEvents() {
+        data class Positive(val data: String) : BottomSheetCheckboxEvent()
+        object Negative : BottomSheetCheckboxEvent()
+    }
 }
 
-
-data class Data(val string: String) : MainDialogEvents()
-
 data class CheckboxState(val possible: List<String>, val selected: String? = null)
-
 data class MultiCheckboxState(val possible: List<String>, val selected: List<String> = emptyList())
 

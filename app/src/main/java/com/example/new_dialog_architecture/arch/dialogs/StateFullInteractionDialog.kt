@@ -1,6 +1,7 @@
 package com.example.new_dialog_architecture.arch.dialogs
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -109,7 +110,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
         }
 
         negativeButton.apply {
-            isVisible = !singleChoice && onNegativeAction != null
+            isVisible = !singleChoice && negativeButtonText.isNotBlank()
             text = negativeButtonText
             setOnClickListener {
                 onNegativeAction?.invoke()?.run {
@@ -132,6 +133,11 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val width = window?.windowManager?.defaultDisplay?.width
         width?.run { dialog?.window?.setLayout((width * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT) }
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        onNegativeAction?.invoke()?.run { interact(this) }
+        super.onCancel(dialog)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

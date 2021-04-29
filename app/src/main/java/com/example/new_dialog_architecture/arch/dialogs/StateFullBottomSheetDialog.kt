@@ -109,6 +109,11 @@ class StateFullBottomSheetDialog<Event, State : Any> : StateDialog<Event, State>
         )
     }
 
+    override fun onCancel(dialog: DialogInterface) {
+        onNegativeAction?.invoke()?.run { interact(this) }
+        super.onCancel(dialog)
+    }
+
     companion object {
         fun <Event, State : Any> newInstance(dialogData: DialogBuilder.DialogData<Event, State>): StateFullBottomSheetDialog<Event, State> =
                 StateFullBottomSheetDialog<Event, State>().apply {
