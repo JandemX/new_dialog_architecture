@@ -110,17 +110,17 @@ class StateFullBottomSheetDialog<Event, State : Any> : StateDialog<Event, State>
     }
 
     companion object {
-        fun <Event, State : Any> newInstance(dialogDataData: DialogBuilder.DialogData<Event, State>
-        ): StateFullBottomSheetDialog<Event, State> = StateFullBottomSheetDialog<Event, State>().apply {
-            layout = dialogDataData.layoutId
-            initialState = dialogDataData.initialState
-            customView = dialogDataData.contentView
-            onPositiveAction = dialogDataData.buttons.onPositiveAction
-            onNegativeAction = dialogDataData.buttons.onNegativeAction
-            dialogTitle = dialogDataData.dialogTitle
-            positiveButtonText = dialogDataData.buttons.positiveButtonText
-            negativeButtonText = dialogDataData.buttons.negativeButtonText
-            singleChoice = dialogDataData.additional.singleChoice
-        }
+        fun <Event, State : Any> newInstance(dialogData: DialogBuilder.DialogData<Event, State>): StateFullBottomSheetDialog<Event, State> =
+                StateFullBottomSheetDialog<Event, State>().apply {
+                    layout = dialogData.layoutId
+                    initialState = dialogData.initialState
+                    customView = dialogData.contentView
+                    onPositiveAction = dialogData.buttons.onPositiveAction
+                    onNegativeAction = dialogData.buttons.onNegativeAction
+                    dialogTitle = dialogData.dialogTitle
+                    positiveButtonText = dialogData.buttons.positiveButtonText
+                    negativeButtonText = dialogData.buttons.negativeButtonText
+                    singleChoice = dialogData.additional.singleChoice
+                }
     }
 }

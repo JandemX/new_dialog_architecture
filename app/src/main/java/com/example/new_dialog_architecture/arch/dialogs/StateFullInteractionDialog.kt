@@ -91,14 +91,11 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(view) {
             positiveButton = findViewById(R.id.positive_button)
+            negativeButton = findViewById(R.id.negative_button)
             title = findViewById(R.id.dialog_title)
         }
 
-        customView.bind(
-                view = view,
-                state = ::state,
-                update = ::updateState
-        )
+        title.text = dialogTitle
 
         positiveButton.apply {
             isVisible = !singleChoice
@@ -110,7 +107,23 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
                 dismissAllowingStateLoss()
             }
         }
-        title.text = dialogTitle
+
+        negativeButton.apply {
+            isVisible = !singleChoice && onNegativeAction != null
+            text = negativeButtonText
+            setOnClickListener {
+                onNegativeAction?.invoke()?.run {
+                    interact(this)
+                }
+                dismissAllowingStateLoss()
+            }
+        }
+
+        customView.bind(
+                view = view,
+                state = ::state,
+                update = ::updateState
+        )
     }
 
     override fun onResume() {
@@ -127,18 +140,19 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
     }
 
     companion object {
-        fun <Event, State : Any> newInstance(dialogDataData: DialogBuilder.DialogData<Event, State>): StateFullInteractionDialog<Event, State> = StateFullInteractionDialog<Event, State>().apply {
-            layout = dialogDataData.layoutId
-            initialState = dialogDataData.initialState
-            customView = dialogDataData.contentView
-            onPositiveAction = dialogDataData.buttons.onPositiveAction
-            onNegativeAction = dialogDataData.buttons.onNegativeAction
-            dialogTitle = dialogDataData.dialogTitle
-            positiveButtonText = dialogDataData.buttons.positiveButtonText
-            negativeButtonText = dialogDataData.buttons.negativeButtonText
-            cancellable = dialogDataData.additional.cancellable
-            singleChoice = dialogDataData.additional.singleChoice
-        }
+        fun <Event, State : Any> newInstance(dialogData: DialogBuilder.DialogData<Event, State>): StateFullInteractionDialog<Event, State> =
+                StateFullInteractionDialog<Event, State>().apply {
+                    layout = dialogData.layoutId
+                    initialState = dialogData.initialState
+                    customView = dialogData.contentView
+                    onPositiveAction = dialogData.buttons.onPositiveAction
+                    onNegativeAction = dialogData.buttons.onNegativeAction
+                    dialogTitle = dialogData.dialogTitle
+                    positiveButtonText = dialogData.buttons.positiveButtonText
+                    negativeButtonText = dialogData.buttons.negativeButtonText
+                    cancellable = dialogData.additional.cancellable
+                    singleChoice = dialogData.additional.singleChoice
+                }
     }
 }
 

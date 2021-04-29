@@ -6,11 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.bottomSheet
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.dialog
-import com.example.new_dialog_architecture.arch.DialogOpenManager
 import com.example.new_dialog_architecture.arch.dialogInteractor
 import com.example.new_dialog_architecture.ui.main.examples.CheckBoxDialogView
 import com.example.new_dialog_architecture.ui.main.examples.ItemListDialogView
@@ -34,13 +35,6 @@ class MainFragment : DaggerFragment() {
     private lateinit var buttonBottomSheetList: Button
     private lateinit var message: TextView
 
-    private val dialogOpenManager = DialogOpenManager(lifecycleScope)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        dialogOpenManager.bind(childFragmentManager)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.main_fragment, container, false)
 
@@ -53,7 +47,8 @@ class MainFragment : DaggerFragment() {
 
         buttonDialogCheckbox.setOnClickListener {
             buttonDialogCheckbox.text = "test"
-            dialogOpenManager.openDialog {
+
+            openDialog {
                 dialog<MainDialogEvents.CheckboxDialogEvent, MultiCheckboxState>(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
                     dialogTitle = "Simple Checkbox Dialog"
@@ -68,7 +63,7 @@ class MainFragment : DaggerFragment() {
         }
 
         buttonBottomSheetCheckbox.setOnClickListener {
-            dialogOpenManager.openDialog {
+            openDialog {
                 bottomSheet<MainDialogEvents.BottomSheetCheckboxEvent, MultiCheckboxState>(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
                     buttons {
@@ -82,7 +77,7 @@ class MainFragment : DaggerFragment() {
         }
 
         buttonBottomSheetList.setOnClickListener {
-            dialogOpenManager.openDialog {
+            openDialog {
                 bottomSheet<MainDialogEvents.ListDialogEvent, ItemListDialogView.ListDialogState>(ItemListDialogView()) {
                     initialState = ItemListDialogView.ListDialogState(List(5) { "listitem$it" })
                     buttons {
@@ -115,6 +110,14 @@ class MainFragment : DaggerFragment() {
                         }
                     }
                 }.flowOn(Dispatchers.Main).collect()
+    }
+
+
+    private fun Fragment.openDialog(dialog: () -> DialogFragment) {
+        childFragmentManager.beginTransaction().apply {
+            dialog().show(this, "test")
+        }
+        childFragmentManager.executePendingTransactions()
     }
 }
 
