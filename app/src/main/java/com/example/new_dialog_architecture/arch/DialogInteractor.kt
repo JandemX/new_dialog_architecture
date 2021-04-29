@@ -8,19 +8,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class Interactor<Event> : ViewModel() {
-    private val _eventStream: MutableSharedFlow<DialogInteraction<Event>> = MutableSharedFlow(0)
-    fun eventStream(onPositive: (Event).() -> Unit, onNegative: (Event).() -> Unit): Flow<DialogInteraction<Event>> = _eventStream.onEach {
-        when (it) {
-            is DialogInteraction.Negative -> onNegative(it.event)
-            is DialogInteraction.Positive -> onPositive(it.event)
-        }
-    }
+    private val _eventStream: MutableSharedFlow<Event> = MutableSharedFlow(0)
+    val eventStream: Flow<Event> = _eventStream.asSharedFlow()
 
-    fun send(event: DialogInteraction<Event>) {
+    fun send(event: Event) {
         viewModelScope.launch { _eventStream.emit(event) }
     }
 }

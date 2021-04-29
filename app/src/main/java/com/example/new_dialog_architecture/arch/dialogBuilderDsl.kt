@@ -11,7 +11,7 @@ import com.example.new_dialog_architecture.arch.dialogs.StateFullInteractionDial
 annotation class DialogBuilderDsl
 
 @DialogBuilderDsl
-class DialogBuilder<Event, State : Any>(private val context: Context, private val contentView: DialogView<Event, State>) {
+class DialogBuilder<Event, State : Any>(private val context: Context, private val contentView: DialogView<State>) {
 
     private val layoutId: Int = contentView.layoutId
     private var buttons: DialogButton<Event, State> = DialogButtonsBuilder<Event, State>().build()
@@ -50,7 +50,7 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
         var positiveButtonText: String = ""
         var negativeButtonText: String = ""
         var onPositiveAction: ((State) -> Event)? = null
-        var onNegativeAction: (() -> Unit) = {}
+        var onNegativeAction: (() -> Event)? = null
 
         fun build(): DialogButton<Event, State> = DialogButton(positiveButtonText, negativeButtonText, onPositiveAction, onNegativeAction)
     }
@@ -60,7 +60,7 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
             val layoutId: Int,
             val initialState: State,
             val dialogTitle: String,
-            val contentView: DialogView<Event, State>,
+            val contentView: DialogView<State>,
             val buttons: DialogButton<Event, State>,
             val additional: Additional
     )
@@ -69,7 +69,7 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
             val positiveButtonText: String,
             val negativeButtonText: String,
             val onPositiveAction: ((State) -> Event)?,
-            val onNegativeAction: () -> Unit
+            val onNegativeAction: (() -> Event)?
     )
 
     data class Additional(
@@ -84,17 +84,17 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
         private fun <Event, State : Any> DialogData<Event, State>.createBottomSheet() =
                 StateFullBottomSheetDialog.newInstance(this)
 
-        fun <Event, State : Any> Fragment.dialog(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder(requireContext(), view).apply(block).build().createDialog()
+        fun <Event, State : Any> Fragment.dialog(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder<Event, State>(requireContext(), view).apply(block).build().createDialog()
 
-        fun <Event, State : Any> Fragment.bottomSheet(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder(requireContext(), view).apply(block).build().createBottomSheet()
+        fun <Event, State : Any> Fragment.bottomSheet(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder<Event, State>(requireContext(), view).apply(block).build().createBottomSheet()
 
-        fun <Event, State : Any> Activity.dialog(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder(this.applicationContext, view).apply(block).build().createDialog()
+        fun <Event, State : Any> Activity.dialog(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder<Event, State>(this.applicationContext, view).apply(block).build().createDialog()
 
-        fun <Event, State : Any> Activity.bottomSheet(view: DialogView<Event, State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder(this.applicationContext, view).apply(block).build().createBottomSheet()
+        fun <Event, State : Any> Activity.bottomSheet(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
+                DialogBuilder<Event, State>(this.applicationContext, view).apply(block).build().createBottomSheet()
     }
 }
 

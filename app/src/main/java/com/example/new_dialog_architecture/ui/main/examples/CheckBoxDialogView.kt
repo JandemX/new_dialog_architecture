@@ -5,13 +5,12 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogView
-import com.example.new_dialog_architecture.ui.main.MainDialogEvents
 import com.example.new_dialog_architecture.ui.main.MultiCheckboxState
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class CheckBoxDialogView : DialogView<MainDialogEvents, MultiCheckboxState> {
+class CheckBoxDialogView : DialogView<MultiCheckboxState> {
     @IgnoredOnParcel
     override val layoutId: Int = R.layout.some_dialog_content
     override fun bind(view: View, state: () -> MultiCheckboxState, update: (MultiCheckboxState) -> Unit) {

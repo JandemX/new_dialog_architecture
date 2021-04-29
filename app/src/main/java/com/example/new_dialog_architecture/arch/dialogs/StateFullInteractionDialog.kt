@@ -18,8 +18,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogBuilder
-import com.example.new_dialog_architecture.arch.DialogInteraction
-import com.example.new_dialog_architecture.arch.DialogInteraction.*
 import com.example.new_dialog_architecture.arch.DialogView
 import com.example.new_dialog_architecture.arch.Interactor
 import com.example.new_dialog_architecture.arch.SimpleInteractionDialogVM
@@ -38,7 +36,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
         }
     }
 
-    override fun interact(event: DialogInteraction<Event>) {
+    override fun interact(event: Event) {
         interactor.send(event)
         dismissAllowingStateLoss()
     }
@@ -50,6 +48,8 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
         viewModel.stateSubject.compareAndSet(state, newState)
     }
 
+    private lateinit var initialState: State
+
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
     private val interactor: Interactor<Event> by dialogInteractor()
 
@@ -57,11 +57,10 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
     private lateinit var positiveButton: Button
     private lateinit var negativeButton: Button
 
-    private var customView: DialogView<Event, State> by argument()
+    private var customView: DialogView<State> by argument()
     private var layout: Int by argument()
-    private var initialState: State by argument()
     private var onPositiveAction: ((State) -> Event)? by argument()
-    private var onNegativeAction: () -> Unit by argument()
+    private var onNegativeAction: (() -> Event)? by argument()
     private var dialogTitle: String by argument()
     private var positiveButtonText: String by argument()
     private var negativeButtonText: String by argument()
@@ -80,7 +79,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
                         .drop(1)
                         .onEach {
                             onPositiveAction?.invoke(state)?.run {
-                                interact(Positive(this))
+                                interact(this)
                             }
                         }.collect()
             }
@@ -106,7 +105,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
             text = positiveButtonText
             setOnClickListener {
                 onPositiveAction?.invoke(state)?.run {
-                    interact(Positive(this))
+                    interact(this)
                 }
                 dismissAllowingStateLoss()
             }

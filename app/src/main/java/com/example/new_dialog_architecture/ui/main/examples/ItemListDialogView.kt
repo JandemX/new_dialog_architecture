@@ -5,12 +5,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogView
-import com.example.new_dialog_architecture.ui.main.ListDialogState
-import com.example.new_dialog_architecture.ui.main.MainDialogEvents
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class ItemListDialogView : DialogView<MainDialogEvents, ListDialogState> {
+class ItemListDialogView : DialogView<ItemListDialogView.ListDialogState> {
+
+    data class ListDialogState(val possible: List<String> = emptyList(), val selected: String? = null)
+
     override val layoutId: Int = R.layout.dialog_list_content
     override fun bind(view: View, state: () -> ListDialogState, update: (ListDialogState) -> Unit) {
         val recycler = view.findViewById<RecyclerView>(R.id.simple_recycler)

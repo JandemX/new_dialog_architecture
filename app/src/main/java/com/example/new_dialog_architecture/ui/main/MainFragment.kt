@@ -1,17 +1,16 @@
 package com.example.new_dialog_architecture.ui.main
 
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.bottomSheet
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.dialog
+import com.example.new_dialog_architecture.arch.DialogOpenManager
 import com.example.new_dialog_architecture.arch.dialogInteractor
 import com.example.new_dialog_architecture.ui.main.examples.CheckBoxDialogView
 import com.example.new_dialog_architecture.ui.main.examples.ItemListDialogView
@@ -19,8 +18,8 @@ import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 
 class MainFragment : DaggerFragment() {
 
@@ -35,6 +34,13 @@ class MainFragment : DaggerFragment() {
     private lateinit var buttonBottomSheetList: Button
     private lateinit var message: TextView
 
+    private val dialogOpenManager = DialogOpenManager(lifecycleScope)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        dialogOpenManager.bind(childFragmentManager)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.main_fragment, container, false)
 
@@ -47,43 +53,52 @@ class MainFragment : DaggerFragment() {
 
         buttonDialogCheckbox.setOnClickListener {
             buttonDialogCheckbox.text = "test"
-            childFragmentManager.beginTransaction().apply {
-                dialog(CheckBoxDialogView()) {
-                    dialogTitle = "Simple Checkbox Dialog"
+            dialogOpenManager.openDialog {
+                dialog<MainDialogEvents.CheckboxDialogEvent, MultiCheckboxState>(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
+                    dialogTitle = "Simple Checkbox Dialog"
                     buttons {
                         positiveButtonText = "Positive"
-                        onPositiveAction = { it }
+                        onPositiveAction = {
+                            MainDialogEvents.CheckboxDialogEvent
+                        }
                     }
-                }.show(this, "test")
+                }
             }
         }
 
         buttonBottomSheetCheckbox.setOnClickListener {
-            childFragmentManager.beginTransaction().apply {
-                bottomSheet(CheckBoxDialogView()) {
+            dialogOpenManager.openDialog {
+                bottomSheet<MainDialogEvents.BottomSheetCheckboxEvent, MultiCheckboxState>(CheckBoxDialogView()) {
                     initialState = MultiCheckboxState(List(5) { "checkbox$it" })
                     buttons {
                         positiveButtonText = "Positive"
-                        onPositiveAction = { it }
+                        onPositiveAction = { state ->
+                            MainDialogEvents.BottomSheetCheckboxEvent
+                        }
                     }
-                }.show(this, "test")
+                }
             }
         }
 
         buttonBottomSheetList.setOnClickListener {
-            childFragmentManager.beginTransaction().apply {
-                bottomSheet(ItemListDialogView()) {
-                    initialState = ListDialogState(List(5) { "listitem$it" })
+            dialogOpenManager.openDialog {
+                bottomSheet<MainDialogEvents.ListDialogEvent, ItemListDialogView.ListDialogState>(ItemListDialogView()) {
+                    initialState = ItemListDialogView.ListDialogState(List(5) { "listitem$it" })
                     buttons {
                         positiveButtonText = "Positive"
-                        onPositiveAction = { it }
+                        onPositiveAction = {
+                            MainDialogEvents.ListDialogEvent
+                        }
+                        onNegativeAction = {
+                            MainDialogEvents.ListDialogEvent
+                        }
                     }
                     additional {
                         singleChoice = true
                         cancellable = true
                     }
-                }.show(this, "test")
+                }
             }
         }
 
@@ -93,34 +108,26 @@ class MainFragment : DaggerFragment() {
     }
 
     private suspend fun collectDialogEvents() {
-        interactor.eventStream(
-                onPositive = {
-                    when (this) {
-                        is ListDialogState -> {
-                            Toast.makeText(this@MainFragment.requireContext(), selected, Toast.LENGTH_LONG).show()
-                        }
-                        is CheckboxState -> {
-                        }
-                        is MultiCheckboxState -> {
-                            buttonDialogCheckbox.text = selected.toString()
+        interactor.eventStream
+                .onEach {
+                    when (it) {
+                        is Data -> {
                         }
                     }
-                },
-                onNegative = {}
-        ).flowOn(Dispatchers.Main).collect()
+                }.flowOn(Dispatchers.Main).collect()
     }
 }
 
-sealed class MainDialogEvents
+sealed class MainDialogEvents {
+    object ListDialogEvent : MainDialogEvents()
+    object CheckboxDialogEvent : MainDialogEvents()
+    object BottomSheetCheckboxEvent : MainDialogEvents()
+}
 
-@Parcelize
-data class Data(val string: String) : MainDialogEvents(), Parcelable
 
-@Parcelize
-data class CheckboxState(val possible: List<String>, val selected: String? = null) : MainDialogEvents(), Parcelable
+data class Data(val string: String) : MainDialogEvents()
 
-@Parcelize
-data class MultiCheckboxState(val possible: List<String>, val selected: List<String> = emptyList()) : MainDialogEvents(), Parcelable
+data class CheckboxState(val possible: List<String>, val selected: String? = null)
 
-@Parcelize
-data class ListDialogState(val possible: List<String> = emptyList(), val selected: String? = null) : MainDialogEvents(), Parcelable
+data class MultiCheckboxState(val possible: List<String>, val selected: List<String> = emptyList())
+
