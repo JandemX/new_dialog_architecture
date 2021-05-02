@@ -49,7 +49,7 @@ class StateFullInteractionDialog<Event, State : Any> : StateDialog<Event, State>
         viewModel.stateSubject.compareAndSet(state, newState)
     }
 
-    private lateinit var initialState: State
+    private var initialState: State by argument()
 
     private val viewModel: SimpleInteractionDialogVM<State> by viewModels(factoryProducer = { producer })
     private val interactor: Interactor<Event> by dialogInteractor()

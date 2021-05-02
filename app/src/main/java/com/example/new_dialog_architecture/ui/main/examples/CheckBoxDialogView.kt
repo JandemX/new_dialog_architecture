@@ -1,16 +1,20 @@
 package com.example.new_dialog_architecture.ui.main.examples
 
+import android.os.Parcelable
 import android.view.View
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogView
-import com.example.new_dialog_architecture.ui.main.MultiCheckboxState
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class CheckBoxDialogView : DialogView<MultiCheckboxState> {
+class CheckBoxDialogView : DialogView<CheckBoxDialogView.MultiCheckboxState> {
+
+    @Parcelize
+    data class MultiCheckboxState(val possible: List<String>, val selected: List<String> = emptyList()) : Parcelable
+
     @IgnoredOnParcel
     override val layoutId: Int = R.layout.some_dialog_content
     override fun bind(view: View, state: () -> MultiCheckboxState, update: (MultiCheckboxState) -> Unit) {
