@@ -13,4 +13,24 @@
         <item name="android:background">@drawable/dialog_bg</item>
     </style>
 
+
+    <!-- BottomSheet Dialog-->
+
+
+    <style name="BottomSheetDialog_Rounded" parent="@style/ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheet_Rounded</item>
+    </style>
+
+    <style name="BottomSheet_Rounded" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceBottomSheetDialog_Rounded</item>
+    </style>
+
+    <style name="ShapeAppearanceBottomSheetDialog_Rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">10dp</item>
+        <item name="cornerSizeTopLeft">10dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+    </style>
+
 </resources>

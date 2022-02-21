@@ -1,17 +1,21 @@
 package com.example.new_dialog_architecture.arch
 
-import android.app.Activity
 import android.content.Context
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import com.example.new_dialog_architecture.arch.dialogs.StateFullBottomSheetDialog
-import com.example.new_dialog_architecture.arch.dialogs.StateFullInteractionDialog
+import com.example.new_dialog_architecture.arch.dialogs.StateDialog
+import com.example.new_dialog_architecture.arch.dialogs.StatefulBottomSheetDialog
+import com.example.new_dialog_architecture.arch.dialogs.StatefulInteractionDialog
+import kotlin.reflect.KClass
 
 @DslMarker
 annotation class DialogBuilderDsl
 
 @DialogBuilderDsl
-class DialogBuilder<Event, State : Any>(private val context: Context, private val contentView: DialogView<State>) {
+class DialogBuilder<Event, State : Any>(
+    private val context: Context,
+    private val contentView: DialogView<State, Event>
+) {
 
     private val layoutId: Int = contentView.layoutId
     private var buttons: DialogButton<Event, State> = DialogButtonsBuilder<Event, State>().build()
@@ -28,73 +32,101 @@ class DialogBuilder<Event, State : Any>(private val context: Context, private va
     }
 
     fun build(): DialogData<Event, State> = DialogData(
-            context,
-            layoutId,
-            initialState,
-            dialogTitle,
-            contentView,
-            buttons,
-            additional
+        context,
+        layoutId,
+        initialState,
+        dialogTitle,
+        contentView,
+        buttons,
+        additional
     )
 
     @DialogBuilderDsl
     class AdditionalBuilder {
         var cancellable: Boolean = true
         var singleChoice: Boolean = false
+        var onShow: () -> Unit = { }
 
-        fun build(): Additional = Additional(cancellable, singleChoice)
+        fun build(): Additional = Additional(cancellable, singleChoice, onShow)
     }
 
     @DialogBuilderDsl
     class DialogButtonsBuilder<Event, State> {
         var positiveButtonText: String = ""
         var negativeButtonText: String = ""
-        var onPositiveAction: ((State) -> Event)? = null
+        var onPositiveAction: ((State?) -> Event)? = null
         var onNegativeAction: (() -> Event)? = null
 
-        fun build(): DialogButton<Event, State> = DialogButton(positiveButtonText, negativeButtonText, onPositiveAction, onNegativeAction)
+        fun build(): DialogButton<Event, State> =
+            DialogButton(positiveButtonText, negativeButtonText, onPositiveAction, onNegativeAction)
     }
 
     data class DialogData<Event, State>(
-            val context: Context,
-            val layoutId: Int,
-            val initialState: State,
-            val dialogTitle: String,
-            val contentView: DialogView<State>,
-            val buttons: DialogButton<Event, State>,
-            val additional: Additional
+        val context: Context,
+        val layoutId: Int,
+        val initialState: State,
+        val dialogTitle: String,
+        val contentView: DialogView<State, Event>,
+        val buttons: DialogButton<Event, State>,
+        val additional: Additional
     )
 
     data class DialogButton<Event, State>(
-            val positiveButtonText: String,
-            val negativeButtonText: String,
-            val onPositiveAction: ((State) -> Event)?,
-            val onNegativeAction: (() -> Event)?
+        val positiveButtonText: String,
+        val negativeButtonText: String,
+        val onPositiveAction: ((State?) -> Event)?,
+        val onNegativeAction: (() -> Event)?
     )
 
     data class Additional(
-            val cancellable: Boolean,
-            val singleChoice: Boolean,
+        val cancellable: Boolean,
+        val singleChoice: Boolean,
+        val onShow: () -> Unit
     )
 
     companion object {
-        private fun <Event, State : Any> DialogData<Event, State>.createDialog() =
-                StateFullInteractionDialog.newInstance(this)
+        @PublishedApi
+        internal fun <Event : Any, State : Any> DialogData<Event, State>.createDialog(eventClazz: KClass<Event>) =
+            StatefulInteractionDialog.newInstance(eventClazz, this)
 
-        private fun <Event, State : Any> DialogData<Event, State>.createBottomSheet() =
-                StateFullBottomSheetDialog.newInstance(this)
+        @PublishedApi
+        internal fun <Event : Any, State : Any> DialogData<Event, State>.createBottomSheet(clazz: KClass<Event>) =
+            StatefulBottomSheetDialog.newInstance(clazz = clazz, this)
 
-        fun <Event, State : Any> Fragment.dialog(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder<Event, State>(requireContext(), view).apply(block).build().createDialog()
+        internal inline fun <reified Event : Any, State : Any> Context.dialog(
+            view: DialogView<State, Event>,
+            block: DialogBuilder<Event, State>.() -> Unit
+        ): DialogFragment =
+            DialogBuilder<Event, State>(this, view).apply(block).build().createDialog(Event::class)
 
-        fun <Event, State : Any> Fragment.bottomSheet(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder<Event, State>(requireContext(), view).apply(block).build().createBottomSheet()
+        inline fun <reified Event : Any, State : Any> Fragment.dialog(
+            view: DialogView<State, Event>,
+            block: DialogBuilder<Event, State>.() -> Unit
+        ): DialogFragment =
+            DialogBuilder<Event, State>(requireContext(), view).apply(block).build()
+                .createDialog(Event::class)
 
-        fun <Event, State : Any> Activity.dialog(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder<Event, State>(this.applicationContext, view).apply(block).build().createDialog()
+        fun Fragment.openDialog(dialog: Fragment.() -> DialogFragment) {
+            with(dialog()) {
+                val tag = (this as? StateDialog)?.customTag ?: ""
+                val transaction = this@openDialog.childFragmentManager.beginTransaction()
+                show(transaction, tag)
+                this@openDialog.childFragmentManager.executePendingTransactions()
+            }
+        }
 
-        fun <Event, State : Any> Activity.bottomSheet(view: DialogView<State>, block: DialogBuilder<Event, State>.() -> Unit): DialogFragment =
-                DialogBuilder<Event, State>(this.applicationContext, view).apply(block).build().createBottomSheet()
+        inline fun <reified Event : Any, State : Any> Context.bottomSheet(
+            view: DialogView<State, Event>,
+            block: DialogBuilder<Event, State>.() -> Unit
+        ): DialogFragment =
+            DialogBuilder<Event, State>(this, view).apply(block).build()
+                .createBottomSheet(Event::class)
+
+        inline fun <reified Event : Any, State : Any> Fragment.bottomSheet(
+            view: DialogView<State, Event>,
+            block: DialogBuilder<Event, State>.() -> Unit
+        ): DialogFragment =
+            DialogBuilder<Event, State>(requireContext(), view).apply(block).build()
+                .createBottomSheet(Event::class)
     }
 }
-

@@ -4,12 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_dialog_architecture.arch.Interactor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -29,10 +24,9 @@ class MainViewModel : ViewModel() {
                     is MainDialogEvents.BottomSheetListEvent.Positive -> {
                         _state.value = event.data
                     }
+                    MainDialogEvents.BottomSheetListEvent.Negative -> TODO()
                 }
             }.flowOn(Dispatchers.Main).collect()
         }
     }
-
-
 }

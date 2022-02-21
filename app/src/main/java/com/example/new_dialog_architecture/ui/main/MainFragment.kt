@@ -1,30 +1,39 @@
 package com.example.new_dialog_architecture.ui.main
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.new_dialog_architecture.R
+import com.example.new_dialog_architecture.WebviewActivity
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.bottomSheet
 import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.dialog
+import com.example.new_dialog_architecture.arch.DialogBuilder.Companion.openDialog
 import com.example.new_dialog_architecture.arch.dialogInteractor
-import com.example.new_dialog_architecture.ui.main.MainDialogEvents.BottomSheetCheckboxEvent
-import com.example.new_dialog_architecture.ui.main.MainDialogEvents.BottomSheetListEvent
-import com.example.new_dialog_architecture.ui.main.MainDialogEvents.DialogCheckboxEvent
+import com.example.new_dialog_architecture.ui.main.MainDialogEvents.*
 import com.example.new_dialog_architecture.ui.main.examples.CheckBoxDialogView
-import com.example.new_dialog_architecture.ui.main.examples.ItemListDialogView
+import com.example.new_dialog_architecture.ui.main.examples.ComposeDialogView
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
+import kotlin.random.Random
 
 class MainFragment : DaggerFragment() {
 
@@ -40,8 +49,14 @@ class MainFragment : DaggerFragment() {
     private lateinit var buttonBottomSheetList: Button
     private lateinit var message: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.main_fragment, container, false)
+    private val number = 5
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View =
+        inflater.inflate(R.layout.main_fragment, container, false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         viewmodel.bind(interactor)
@@ -49,6 +64,15 @@ class MainFragment : DaggerFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        interactor.eventStream.onEach { event ->
+            when (event) {
+                is BottomSheetCheckboxEvent.Positive -> {
+                    openGoogle(requireActivity())
+                }
+                else -> {}
+            }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
+
         buttonDialogCheckbox = view.findViewById(R.id.button_dialog_checkbox)
         buttonBottomSheetCheckbox = view.findViewById(R.id.button_bottomsheet_checkbox)
         buttonBottomSheetList = view.findViewById(R.id.button_bottomsheet_list)
@@ -65,15 +89,25 @@ class MainFragment : DaggerFragment() {
         buttonDialogCheckbox.setOnClickListener {
             buttonDialogCheckbox.text = "test"
 
+//            openDialog {
+//                dialogCompose(DialogTestView()) {
+//                    initialState =
+//                        CheckBoxDialogView.MultiCheckboxState(possible = List(5) { "checkbox$it" },
+//                            selected = List(3) { "checkbox$it" })
+//                }
+//            }
+
             openDialog {
-                dialog<DialogCheckboxEvent, CheckBoxDialogView.MultiCheckboxState>(CheckBoxDialogView()) {
+                dialog(CheckBoxDialogView()) {
                     initialState = CheckBoxDialogView.MultiCheckboxState(List(5) { "checkbox$it" })
                     dialogTitle = "Simple Checkbox Dialog"
                     buttons {
                         positiveButtonText = "Positive"
                         negativeButtonText = "Negative"
-                        onPositiveAction = { DialogCheckboxEvent.Positive(it.selected.toString()) }
-                        onNegativeAction = { DialogCheckboxEvent.Negative }
+                        onPositiveAction = {
+                            println("test dialog")
+                            DialogCheckboxEvent.Positive(it?.selected.toString())
+                        }
                     }
                 }
             }
@@ -81,12 +115,16 @@ class MainFragment : DaggerFragment() {
 
         buttonBottomSheetCheckbox.setOnClickListener {
             openDialog {
-                bottomSheet<BottomSheetCheckboxEvent, CheckBoxDialogView.MultiCheckboxState>(CheckBoxDialogView()) {
-                    initialState = CheckBoxDialogView.MultiCheckboxState(List(5) { "checkbox$it" })
+                bottomSheet(CheckBoxDialogView()) {
+                    initialState = CheckBoxDialogView.MultiCheckboxState(
+                        List(5) { "checkbox$it" },
+                        action = {
+                            Log.d("MainFragment", "action with " + it * Random.nextInt())
+                        }
+                    )
+
                     buttons {
                         positiveButtonText = "Positive"
-                        onPositiveAction = { state -> BottomSheetCheckboxEvent.Positive(state.selected.toString()) }
-                        onNegativeAction = { BottomSheetCheckboxEvent.Negative }
                     }
                 }
             }
@@ -94,26 +132,84 @@ class MainFragment : DaggerFragment() {
 
         buttonBottomSheetList.setOnClickListener {
             openDialog {
-                bottomSheet<BottomSheetListEvent, ItemListDialogView.ListDialogState>(ItemListDialogView()) {
-                    initialState = ItemListDialogView.ListDialogState(List(50) { "listitem$it" })
+                bottomSheet(CheckBoxDialogView()) {
+                    initialState = CheckBoxDialogView.MultiCheckboxState(
+                        List(5) { "checkbox$it" },
+                        action = {
+                            it * 5
+                        }
+                    )
                     buttons {
-                        onPositiveAction = { BottomSheetListEvent.Positive(it.selected ?: "") }
-                        onNegativeAction = { BottomSheetListEvent.Negative }
+                        positiveButtonText = "Positive"
+                        onPositiveAction =
+                            { state -> BottomSheetCheckboxEvent.Positive(state?.selected.toString()) }
                     }
-                    additional {
-                        singleChoice = true
-                        cancellable = true
+                }
+//                bottomSheet<BottomSheetListEvent, ItemListDialogView.ListDialogState>(
+//                    ItemListDialogView()
+//                ) {
+//                    initialState = ItemListDialogView.ListDialogState(List(50) { "listitem$it" })
+//                    buttons {
+//                        onPositiveAction = { BottomSheetListEvent.Positive(it?.selected ?: "") }
+//                        onNegativeAction = { BottomSheetListEvent.Negative }
+//                    }
+//                    additional {
+//                        singleChoice = true
+//                        cancellable = true
+//                    }
+//                }
+            }
+        }
+    }
+
+
+    @Parcelize
+    class DialogTestView :
+        ComposeDialogView<CheckBoxDialogView.MultiCheckboxState, MainDialogEvents> {
+
+        @Composable
+        override fun compose(
+            stateFlow: MutableStateFlow<CheckBoxDialogView.MultiCheckboxState?>,
+            interact: (MainDialogEvents) -> Unit
+        ) {
+            Column {
+                stateFlow.value?.apply {
+                    possible.forEach { element ->
+                        Row {
+                            val state = remember {
+                                mutableStateOf(stateFlow.value?.selected ?: emptyList())
+                            }
+                            Text(text = element)
+                            Checkbox(
+                                checked = state.value.contains(element),
+                                onCheckedChange = {
+                                    if (it) {
+                                        state.value = state.value + element
+                                        stateFlow.value =
+                                            stateFlow.value?.copy(selected = selected + element)
+                                    } else {
+                                        state.value = state.value - element
+                                        stateFlow.value =
+                                            stateFlow.value?.copy(selected = selected - element)
+                                    }
+                                })
+                        }
                     }
+                }
+
+                Button(
+                    onClick = {
+                        interact(DialogCheckboxEvent.Positive(stateFlow.value?.selected.toString()))
+                    }) {
+
                 }
             }
         }
     }
 
-    private fun Fragment.openDialog(dialog: () -> DialogFragment) {
-        childFragmentManager.beginTransaction().apply {
-            dialog().show(this, "test, need to find a solution for this") // TODO: find out for what we could use this tag
-        }
-        childFragmentManager.executePendingTransactions()
+    private fun openGoogle(context: Context) {
+        val intent = Intent(context, WebviewActivity::class.java)
+        startActivity(intent)
     }
 }
 
@@ -124,13 +220,15 @@ sealed class MainDialogEvents {
         object Negative : BottomSheetListEvent()
     }
 
+    sealed class CheckBoxStringEvent : MainDialogEvents() {
+        abstract val data: String
+    }
+
     sealed class DialogCheckboxEvent : MainDialogEvents() {
         data class Positive(val data: String) : DialogCheckboxEvent()
-        object Negative : DialogCheckboxEvent()
     }
 
     sealed class BottomSheetCheckboxEvent : MainDialogEvents() {
         data class Positive(val data: String) : BottomSheetCheckboxEvent()
-        object Negative : BottomSheetCheckboxEvent()
     }
 }

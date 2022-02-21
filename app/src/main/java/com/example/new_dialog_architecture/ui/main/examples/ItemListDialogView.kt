@@ -1,21 +1,26 @@
 package com.example.new_dialog_architecture.ui.main.examples
 
-import android.os.Parcelable
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.new_dialog_architecture.R
 import com.example.new_dialog_architecture.arch.DialogView
-import kotlinx.parcelize.Parcelize
+import com.example.new_dialog_architecture.ui.main.MainDialogEvents
 
-@Parcelize
-class ItemListDialogView : DialogView<ItemListDialogView.ListDialogState> {
+class ItemListDialogView : DialogView<ItemListDialogView.ListDialogState, MainDialogEvents> {
 
-    @Parcelize
-    data class ListDialogState(val possible: List<String> = emptyList(), val selected: String? = null): Parcelable
+    data class ListDialogState(
+        val possible: List<String> = emptyList(),
+        val selected: String? = null
+    )
 
     override val layoutId: Int = R.layout.dialog_list_content
-    override fun bind(view: View, state: () -> ListDialogState, update: (ListDialogState) -> Unit) {
+    override fun bind(
+        view: View,
+        state: () -> ListDialogState,
+        update: (ListDialogState) -> Unit,
+        sendEvent: (MainDialogEvents) -> Unit
+    ) {
         val recycler = view.findViewById<RecyclerView>(R.id.simple_recycler)
         state().possible.run {
             recycler.apply {
@@ -25,6 +30,10 @@ class ItemListDialogView : DialogView<ItemListDialogView.ListDialogState> {
                 }
             }
         }
+    }
+
+    override fun onUpdate(state: ListDialogState) {
+
     }
 }
 
